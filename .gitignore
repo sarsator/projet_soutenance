@@ -1,0 +1,9 @@
+﻿# Fichiers à ignorer
+.venv/
+__pycache__/
+*.pyc
+.env
+db/predictions.db
+images_a_traiter/
+images_traitees/
+training/models/

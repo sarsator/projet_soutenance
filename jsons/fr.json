@@ -1,0 +1,12 @@
+{
+  "title": "Analyse de sac",
+  "submit": "Lancer l'analyse",
+  "race_label": "Race du champignon",
+  "substrat_label": "Type de substrat",
+  "jours": "Jours depuis inoculation",
+  "hygro": "Hygrométrie (%)",
+  "co2": "CO₂ (ppm)",
+  "commentaire": "Commentaire",
+  "photo": "Photo du sac",
+  "response_title": "Réponse"
+}

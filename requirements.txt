@@ -1,0 +1,9 @@
+# fastapi
+# uvicorn
+# flask
+# jinja2
+# python-dotenv
+# requests
+# scikit-learn
+# pillow
+# sqlalchemy

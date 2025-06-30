@@ -1,0 +1,18 @@
+{
+  "champignon_types": [
+    {"value": "pleurotus_ostreatus", "label_fr": "Pleurote", "label_en": "Oyster mushroom"},
+    {"value": "pleurotus_eryngii", "label_fr": "Pleurote du panicaut", "label_en": "King oyster mushroom"},
+    {"value": "pleurotus_pulmonarius", "label_fr": "Pleurote indien", "label_en": "Indian oyster mushroom"},
+    {"value": "pleurotus_citrinopileatus", "label_fr": "Pleurote citron", "label_en": "Golden oyster mushroom"},
+    {"value": "pleurotus_djamor", "label_fr": "Pleurote rose", "label_en": "Pink oyster mushroom"},
+    {"value": "lentinula_edodes", "label_fr": "Shiitake", "label_en": "Shiitake"},
+    {"value": "agaricus_bisporus", "label_fr": "Champignon de Paris", "label_en": "Button mushroom"},
+    {"value": "agaricus_blazei", "label_fr": "Champignon du soleil", "label_en": "Almond mushroom"},
+    {"value": "grifola_frondosa", "label_fr": "Maitaké", "label_en": "Maitake"},
+    {"value": "auricularia_auricula_judae", "label_fr": "Oreille de Judas", "label_en": "Wood ear mushroom"},
+    {"value": "ganoderma_lucidum", "label_fr": "Reishi", "label_en": "Reishi"},
+    {"value": "hericium_erinaceus", "label_fr": "Lion’s Mane", "label_en": "Lion’s Mane"},
+    {"value": "cyclocybe_aegerita", "label_fr": "Pholiote du peuplier", "label_en": "Poplar mushroom"},
+    {"value": "stropharia_rugosoannulata", "label_fr": "Strophaire à anneaux rugueux", "label_en": "Wine cap mushroom"}
+  ]
+}

@@ -1,0 +1,116 @@
+/* === RESET GENERAL === */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* === HEADER / FOOTER === */
+header, footer {
+    background-color: #1e2a78;
+    color: white;
+    text-align: center;
+    padding: 1em 0;
+}
+
+a.lang {
+    color: #ffffff;
+    margin: 0 10px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+a.lang:hover {
+    text-decoration: underline;
+}
+
+/* === CONTENEUR PRINCIPAL === */
+main {
+    max-width: 500px;
+    width: 95%;
+    margin: 3em auto;
+    background: #ffffff;
+    padding: 2em 2.5em;
+    border-radius: 10px;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.07);
+    box-sizing: border-box;
+}
+
+/* === FORMULAIRE === */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2em;
+    width: 100%;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1em;
+}
+
+.form-group label {
+    margin-bottom: 0.4em;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.6em 0.8em;
+    font-size: 0.95em;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    background-color: #fdfdfd;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #1976d2;
+    outline: none;
+}
+
+/* === BOUTON === */
+button {
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 0.7em 1.4em;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    align-self: center;
+}
+
+button:hover {
+    background-color: #1259aa;
+}
+
+/* === SECTION RÉPONSE === */
+pre {
+    background-color: #f0f4f8;
+    padding: 1em;
+    border-radius: 5px;
+    font-size: 0.9em;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+/* === MOBILE === */
+@media (max-width: 600px) {
+    main {
+        padding: 1.5em 1em;
+    }
+
+    .form-container {
+        padding: 0;
+    }
+}
