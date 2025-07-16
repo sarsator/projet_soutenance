@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}GaïaSense Vision{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='front.css') }}">
+</head>
+
+<body>
+    <header>
+        <h1>GaïaSense Vision</h1>
+        <p>Analyse de sacs de culture |<a href="/?lang=fr" class="lang">FR</a> |
+        <a href="/?lang=en" class="lang">EN</a></p>
+        <hr>
+    </header>
+<!-- Indicateur de chargement amélioré - AVANT le contenu principal -->
+<div id="loadingIndicator" class="loading-container" style="display: none;">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">
+            <h3>🔬 Analyse en cours...</h3>
+            <p>Traitement intelligent de votre échantillon</p>
+            <div class="loading-steps">
+                <div class="step active" id="step1">📊 Analyse des paramètres environnementaux</div>
+                <div class="step" id="step2">🧠  Traitement de l'image par IA</div>
+                <div class="step" id="step3">🔬 Synthèse et diagnostic final</div>
+            </div>
+            <div style="margin-top: 1.5em; font-size: 0.9em; color: #78909c; opacity: 0.8;">
+                ⚡ Modèles IA dernière génération • Temps de traitement optimisé
+            </div>
+        </div>
+    </div>
+</div>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <hr>
+        <p style="font-size: small;">&copy; 2025 - Projet IA Alyra - Naminsita, Maxime, Davy </p>
+    </footer>
+</body>
+
+</html>

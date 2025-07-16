@@ -1,0 +1,46 @@
+{
+  "version": "1.3",
+  "timestamp": "2025-07-16T13:25:40.309630",
+  "model_type": "deep_learning_object_detection",
+  "deployed_at": "2025-07-16 13:25:40",
+  "deployment_id": "20250716_132518",
+  "model_size_mb": 22.83,
+  "model_size_bytes": 23936569,
+  "architecture": "SSD_MobileNet_V2_320x320",
+  "framework": "TensorFlow_Object_Detection_API",
+  "signatures": [
+    "serving_default"
+  ],
+  "deployed_by": "automated_deployment_notebook",
+  "training_notebook": "dl_finetuning.ipynb",
+  "source_path": "/home/sarsator/projets/gaia_vision/training/models/dl_model/outputs/ssd_mnv2_320/exported_model/saved_model",
+  "deployment_type": "production_savedmodel",
+  "model_format": "tensorflow_savedmodel",
+  "deployed_path": "/home/sarsator/projets/gaia_vision/api/models/dl_model/versions/v1.3_20250716_132518/saved_model",
+  "performance_metrics": {
+    "precision": 99.8,
+    "recall": 96.0,
+    "f1_score": 97.9,
+    "inference_time_ms": 16,
+    "test_images": 394,
+    "training_steps": 30000
+  },
+  "model_capabilities": [
+    "mushroom_detection",
+    "contamination_classification",
+    "real_time_inference",
+    "batch_processing"
+  ],
+  "input_specifications": {
+    "image_size": "320x320",
+    "channels": 3,
+    "format": "RGB",
+    "normalization": "0-255"
+  },
+  "output_specifications": {
+    "detection_boxes": "N boxes with coordinates",
+    "detection_classes": "Class IDs (1: healthy, 2: contaminated)",
+    "detection_scores": "Confidence scores 0-1",
+    "num_detections": "Number of valid detections"
+  }
+}

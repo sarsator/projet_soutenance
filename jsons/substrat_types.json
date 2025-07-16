@@ -1,0 +1,19 @@
+{
+  "substrat_types": [
+    {"value": "paille", "label_fr": "Paille", "label_en": "Straw"},
+    {"value": "sciure", "label_fr": "Sciure de bois dur", "label_en": "Hardwood sawdust"},
+    {"value": "pellets_boisdur", "label_fr": "Granulés de bois dur", "label_en": "Hardwood pellets"},
+    {"value": "copeaux", "label_fr": "Copeaux de bois", "label_en": "Wood chips"},
+    {"value": "marc_cafe", "label_fr": "Marc de café", "label_en": "Coffee grounds"},
+    {"value": "compost", "label_fr": "Compost / Fumier", "label_en": "Compost / Manure"},
+    {"value": "cvv", "label_fr": "Coir + Vermiculite + Gypse (CVG)", "label_en": "Coir + Vermiculite + Gypsum"},
+    {"value": "coques_soja", "label_fr": "Coques de soja", "label_en": "Soybean hulls"},
+    {"value": "pulpe_cacao", "label_fr": "Pulpe de cacao", "label_en": "Cocoa pulp"},
+    {"value": "balles_graines", "label_fr": "Balles de céréales (son, millet)", "label_en": "Grain hulls (bran, millet)"},
+    {"value": "papier_carton", "label_fr": "Papier / Carton", "label_en": "Paper / Cardboard"},
+    {"value": "ecorces_feuilles", "label_fr": "Écorces / Feuilles mortes", "label_en": "Bark / Leaf litter"},
+    {"value": "maizien", "label_fr": "Broyat de maïs", "label_en": "Corn cobs"},
+    {"value": "mix_fumier_paille", "label_fr": "Mix fumier/paille/coco/vermiculite", "label_en": "Manure‑straw‑coir mix"},
+    {"value": "autre", "label_fr": "Autre", "label_en": "Other"}
+  ]
+}

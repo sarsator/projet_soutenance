@@ -1,0 +1,25 @@
+[
+  {
+    "version": "1.0",
+    "timestamp": "2025-07-11T14:52:16.359681",
+    "model_type": "classification",
+    "deployed_at": "2025-07-11 14:52:16",
+    "deployment_id": "20250711_145216",
+    "model_name": "CatBoost ML Model",
+    "algorithm": "CatBoost",
+    "features": [
+      "champignon",
+      "substrat",
+      "Jour_inoculation",
+      "co2",
+      "hygrometrie"
+    ],
+    "dataset_source": "Dataset_combined_90000_modifie_complexe.csv",
+    "training_notebook": "Machine_learning.ipynb",
+    "model_file": "model_catboost_best.joblib",
+    "model_size_bytes": 649104,
+    "model_size_mb": 0.62,
+    "source_path": "../models/Ml_model/model_catboost_best.joblib",
+    "deployed_path": "../../api/models/ml_model/versions/v1.0_20250711_145216/model_catboost_best.joblib"
+  }
+]

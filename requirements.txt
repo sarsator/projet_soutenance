@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+flask
+jinja2
+python-dotenv
+requests
+scikit-learn
+pillow>=9.0.0
+pandas>=1.3.0
+sqlalchemy

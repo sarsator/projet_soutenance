@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-07-11T14:32:45.301773",
+  "model_type": "deep_learning",
+  "deployed_at": "2025-07-11 14:32:45",
+  "deployment_id": "20250711_143245",
+  "model_size_mb": 56.77,
+  "architecture": "EfficientNetB0",
+  "demo_deployment": true,
+  "deployed_by": "demo_script",
+  "training_notebook": "demonstration",
+  "source_path": "training/models/dl_model/outputs/final_model.keras",
+  "deployment_type": "demo_automatic_versioning",
+  "model_file": "final_model.keras",
+  "model_size_bytes": 59531268,
+  "deployed_path": "api/models/dl_model/versions/v1.0_20250711_143245/final_model.keras"
+}

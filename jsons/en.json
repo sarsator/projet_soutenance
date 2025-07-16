@@ -1,0 +1,12 @@
+{
+  "title": "Bag analysis",
+  "submit": "Start analysis",
+  "race_label": "Mushroom type",
+  "substrat_label": "Substrate type",
+  "jours": "Days since inoculation",
+  "hygro": "Humidity (%)",
+  "co2": "CO₂ (ppm)",
+  "commentaire": "Comment",
+  "photo": "Bag photo",
+  "response_title": "Response"
+}

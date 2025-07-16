@@ -1,0 +1,2 @@
+origin	https://github.com/sarsator/projet_soutenance.git (fetch)
+origin	https://github.com/sarsator/projet_soutenance.git (push)

@@ -1,0 +1,21 @@
+﻿# Fichiers à ignorer
+.venv/
+__pycache__/
+*.pyc
+.env
+db/predictions.db
+api/images_a_traiter/*
+images_traitees/*
+training/models/*
+training/data/*
+# >>> GAIA VISION IGNORES >>>
+*.keras
+*.joblib
+frontend/static/uploads/*
+# <<<
+training/data/DL_data/*
+# modèles DL/TensorFlow
+*.keras
+*.h5
+*.pb
+training/notebook/old/*

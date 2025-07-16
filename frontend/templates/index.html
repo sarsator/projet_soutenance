@@ -1,0 +1,899 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lang["title"] }}{% endblock %}
+
+
+
+{% block content %}
+<h1>{{ lang["title"] }}</h1>
+
+<form method="POST" enctype="multipart/form-data" class="form-container" id="analysisForm">
+
+    <div class="form-group">
+        <label>{{ lang["race_label"] }}</label>
+        <select name="race_champignon">
+            {% for item in champignons %}
+            <option value="{{ item.value }}">{{ item["label_" + lang_code] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>{{ lang["substrat_label"] }}</label>
+        <select name="type_substrat">
+            {% for item in substrats %}
+            <option value="{{ item.value }}">{{ item["label_" + lang_code] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>{{ lang["jours"] }}</label>
+        <input type="date" id="jours_inoculation" name="jours_inoculation" required>
+    </div>
+
+    <div class="form-group">
+        <label>{{ lang["hygro"] }}</label>
+        <input type="number" id="hygrometrie_num" name="hygrometrie" step="0.1" min="0" max="100" value="99" required>
+        <input type="range" id="hygrometrie_slider" min="0" max="100" step="0.1" value="99">
+    </div>
+
+    <div class="form-group">
+        <label>{{ lang["co2"] }}</label>
+        <input type="number" name="co2_ppm" value="2000" required>
+    </div>
+
+    <div class="form-group">
+        <label>{{ lang["commentaire"] }}</label>
+        <textarea name="commentaire" rows="4"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>{{ lang["photo"] }}</label>
+        <input type="file" name="image" accept=".jpg,.jpeg,.png" required id="imageInput">
+        <div id="imagePreview" class="image-preview"></div>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" id="submitBtn">{{ lang["submit"] }}</button>
+    </div>
+
+</form>
+
+{% if response %}
+<hr>
+
+{% if response.error %}
+<!-- Affichage des erreurs -->
+<div class="error-container">
+    <h2>❌ Erreur</h2>
+<!-- Gestion d'erreur améliorée -->
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-header">
+            <span class="error-icon">{{ response.error_icon or "❌" }}</span>
+            <h3>{{ response.error_message or "Une erreur s'est produite" }}</h3>
+        </div>
+        
+        <div class="error-body">
+            <p class="error-description">{{ response.error_details or "Veuillez réessayer." }}</p>
+            
+            {% if response.error_type == "connection" or response.error_type == "service" %}
+            <div class="error-actions">
+                <button type="button" onclick="location.reload()" class="retry-button">
+                    🔄 Réessayer
+                </button>
+                <small>Si le problème persiste, contactez le support technique.</small>
+            </div>
+            {% elif response.error_type == "timeout" %}
+            <div class="error-actions">
+                <button type="button" onclick="location.reload()" class="retry-button">
+                    🔄 Réessayer
+                </button>
+                <small>Conseil : Utilisez une image plus petite (< 5MB) pour accélérer l'analyse.</small>
+            </div>
+            {% else %}
+            <div class="error-actions">
+                <button type="button" onclick="location.reload()" class="retry-button">
+                    🔄 Réessayer
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if response.technical_details and response.error_type != "connection" %}
+        <details class="error-technical">
+            <summary>🔧 Détails techniques (pour les développeurs)</summary>
+            <pre class="error-code">{{ response.technical_details }}</pre>
+        </details>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% else %}
+<!-- Résultat Professionnel -->
+<div class="result-container">
+    <h2>🍄 Résultat de l'Analyse par {{ response.analysis_method or "Intelligence Artificielle" }}</h2>
+    
+    {% if response.uploaded_image_filename %}
+    <!-- Image analysée avec visualisation des détections -->
+    <div class="analyzed-image">
+        <h3>🔍 Image analysée</h3>
+        <div class="image-container" style="position: relative; display: inline-block;">
+            <img src="{{ url_for('static', filename='uploads/' + response.uploaded_image_filename) }}" 
+                 alt="Image analysée" class="result-image" id="analysisImage">
+            <canvas id="detectionCanvas" style="position: absolute; top: 0; left: 0; pointer-events: none;"></canvas>
+        </div>
+        
+        <div class="detection-controls" style="margin-top: 10px;">
+            {% if response.vision_prediction and response.vision_prediction.detections %}
+            <button type="button" class="toggle-detections" onclick="toggleDetections()">
+                🎯 Afficher les détections
+            </button>
+            
+            {% set contaminated_count = response.vision_prediction.detection_summary.contaminated_count %}
+            <span class="detection-info" style="margin-left: 15px; font-size: 0.9em; color: #666;">
+                {{ response.vision_prediction.detection_summary.total_detections }} détection(s) trouvée(s)
+                {% if contaminated_count > 0 %}
+                - {{ contaminated_count }} contamination(s)
+                {% endif %}
+            </span>
+            
+            <!-- Boutons heatmap seulement si contamination détectée -->
+            <!-- DEBUG: Affichage toujours pour tester -->
+            <button type="button" class="heatmap-button" onclick="generateHeatmap()" style="margin-left: 10px;">
+                🔥 Heatmap contamination
+            </button>
+            <button type="button" class="overlay-button" onclick="generateOverlay()" style="margin-left: 10px;">
+                🎯 Overlay contamination
+            </button>
+            
+            <!-- Condition d'origine (désactivée pour debug) -->
+            <!--
+            {% set contaminated_detections = response.vision_prediction.detections | selectattr('class_name', 'equalto', 'contaminated') | list %}
+            {% if contaminated_detections | length > 0 %}
+            <button type="button" class="heatmap-button" onclick="generateHeatmap()" style="margin-left: 10px;">
+                🔥 Heatmap contamination
+            </button>
+            <button type="button" class="overlay-button" onclick="generateOverlay()" style="margin-left: 10px;">
+                🎯 Overlay contamination
+            </button>
+            {% endif %}
+            -->
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+    
+    <!-- Zone heatmap de contamination -->
+    {% if response.prediction == "contamine" or response.prediction == 1 %}
+    <div class="heatmap-zone" style="margin-top: 20px; padding: 20px; border-radius: 12px; background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border: 2px solid #fc8181; box-shadow: 0 4px 12px rgba(252, 129, 129, 0.2);">
+        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+            <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #ff6b6b, #ee5a52); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; animation: pulse 2s infinite;">
+                🔥
+            </div>
+            <div>
+                <h4 style="margin: 0; color: #c53030; font-size: 1.2em; font-weight: bold;">Analyse Thermique de Contamination</h4>
+                <p style="margin: 2px 0 0 0; color: #9c4221; font-size: 0.9em;">Visualisation des zones de contamination détectées</p>
+            </div>
+        </div>
+        
+        <div class="heatmap-buttons" style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <button type="button" class="heatmap-button" onclick="generateHeatmap()" 
+                    style="flex: 1; padding: 12px 20px; background: linear-gradient(45deg, #ff6b6b, #ee5a52); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 8px rgba(238, 90, 82, 0.3);">
+                🔥 Heatmap Thermique
+            </button>
+            <button type="button" class="overlay-button" onclick="generateOverlay()"
+                    style="flex: 1; padding: 12px 20px; background: linear-gradient(45deg, #4299e1, #3182ce); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 8px rgba(49, 130, 206, 0.3);">
+                🎯 Overlay Précis
+            </button>
+        </div>
+        
+        <div class="heatmap-info" style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; border-left: 4px solid #fc8181;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #2d3748; font-weight: 500;">📊 Contamination détectée</span>
+                <span style="color: #c53030; font-weight: bold; font-size: 1.1em;">{{ (response.confidence * 100)|round(1) }}%</span>
+            </div>
+            <div style="color: #4a5568; font-size: 0.85em; margin-top: 4px;">
+                Cliquez sur un bouton pour générer la visualisation thermique
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Résultat principal -->
+    <div class="result-main">
+        {% if response.prediction == 0 or response.prediction == "sain" %}
+        <div class="result-status healthy">
+            <div class="status-icon">🌿</div>
+            <div class="status-text">
+                <h3>Échantillon SAIN</h3>
+                <p>Aucune contamination détectée</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="result-status contaminated">
+            <div class="status-icon">🚨</div>
+            <div class="status-text">
+                <h3>Contamination DÉTECTÉE</h3>
+                <p>Présence de contamination probable</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="confidence-score">
+            <h4>Niveau de confiance 
+                {% if response.confidence_source == "vision" %}
+                    (Modèle Vision)
+                {% elif response.confidence_source == "catboost" %}
+                    (Modèle CatBoost)
+                {% endif %}
+            </h4>
+            <div class="confidence-bar">
+                <div class="confidence-fill" style="width: {{ (response.confidence * 100)|round(1) }}%"></div>
+            </div>
+            <span class="confidence-text">{{ (response.confidence * 100)|round(1) }}%</span>
+        </div>
+    </div>
+    
+    <!-- Détails de l'analyse -->
+    <div class="analysis-details">
+        <h3>📊 Détails de l'analyse</h3>
+        
+        {% if response.details.vision_prediction %}
+        <div class="analysis-method">
+            <strong>Méthodes utilisées :</strong>
+            <span class="method-tags">
+                {% for method in response.details.models_used %}
+                <span class="method-tag">{{ method }}</span>
+                {% endfor %}
+            </span>
+        </div>
+        
+        <!-- Affichage des versions des modèles -->
+        {% if response.details.model_versions %}
+        <div class="model-versions">
+            <strong>Versions des modèles :</strong>
+            <span class="version-tags">
+                {% if response.details.model_versions.catboost %}
+                <span class="version-tag catboost">CatBoost {{ response.details.model_versions.catboost }}</span>
+                {% endif %}
+                {% if response.details.model_versions.vision %}
+                <span class="version-tag vision">Vision {{ response.details.model_versions.vision }}</span>
+                {% endif %}
+            </span>
+        </div>
+        {% endif %}
+        
+        <!-- Affichage du nombre de sacs détectés -->
+        {% if response.multi_sac_count is not none %}
+        <div class="sac-count-info">
+            <h4>🛍️ Analyse des sacs</h4>
+            <div class="sac-count">
+                <strong>Nombre de sacs détectés :</strong> 
+                <span class="sac-number">{{ "%.1f"|format(response.multi_sac_count) }}</span>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        
+        <div class="parameters-used">
+            <h4>Paramètres analysés</h4>
+            <div class="param-grid">
+                <div class="param-item">
+                    <strong>Champignon :</strong> {{ response.input_parameters.race_champignon }}
+                </div>
+                <div class="param-item">
+                    <strong>Substrat :</strong> {{ response.input_parameters.type_substrat }}
+                </div>
+                <div class="param-item">
+                    <strong>Jours :</strong> {{ response.input_parameters.jours_inoculation }}
+                </div>
+                <div class="param-item">
+                    <strong>Hygrométrie :</strong> {{ response.input_parameters.hygrometrie }}%
+                </div>
+                <div class="param-item">
+                    <strong>CO2 :</strong> {{ response.input_parameters.co2_ppm }} ppm
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Détails techniques (pliables) -->
+    <div class="technical-details">
+        <button class="toggle-details" onclick="toggleTechnicalDetails()">
+            🔧 Afficher les détails techniques
+        </button>
+        <div id="technicalData" class="technical-data" style="display: none;">
+            <h4>Données techniques complètes</h4>
+            <pre class="json-output">{{ response | tojson(indent=2) }}</pre>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Initialisation des données de détection -->
+<script>
+{% if response and response.vision_prediction and response.vision_prediction.detections %}
+window.detectionData = {
+    detections: {{ response.vision_prediction.detections | tojson | safe }}
+};
+{% else %}
+window.detectionData = null;
+{% endif %}
+</script>
+
+<script>
+// Encapsuler tout le code dans une fonction auto-exécutée pour éviter les conflits
+(function() {
+    'use strict';
+    
+    // Éviter la re-exécution si déjà initialisé
+    if (window.gaiaVisionInitialized) {
+        console.log('🔧 Script déjà initialisé, arrêt pour éviter les conflits');
+        return;
+    }
+    window.gaiaVisionInitialized = true;
+    
+    console.log('🔧 Initialisation de Gaia Vision');
+
+    // Gestion du formulaire avec AJAX pour maintenir l'overlay
+    const analysisForm = document.getElementById('analysisForm');
+    if (analysisForm && !analysisForm.dataset.listenerAttached) {
+        analysisForm.dataset.listenerAttached = 'true';
+        analysisForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêcher la soumission normale
+            
+            const startTime = Date.now();
+            const minimumLoadingTime = 6000; // 6 secondes minimum
+            
+            // Afficher l'indicateur de chargement
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'flex';
+            }
+            document.getElementById('submitBtn').disabled = true;
+            
+            // Animation progressive des étapes
+            setTimeout(() => {
+                const step1 = document.getElementById('step1');
+                if (step1) {
+                    step1.classList.add('completed');
+                    step1.classList.remove('active');
+                    const step2 = document.getElementById('step2');
+                    if (step2) step2.classList.add('active');
+                }
+            }, 1800);
+            
+            setTimeout(() => {
+                const step2 = document.getElementById('step2');
+                if (step2) {
+                    step2.classList.add('completed');
+                    step2.classList.remove('active');
+                    const step3 = document.getElementById('step3');
+                    if (step3) step3.classList.add('active');
+                }
+            }, 3200);
+            
+            // Préparer les données du formulaire
+            const formData = new FormData(this);
+            
+            // Envoyer la requête AJAX
+            fetch(this.action || window.location.href, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur réseau');
+                }
+                return response.text();
+            })
+            .then(html => {
+                // Calculer le temps restant à attendre
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, minimumLoadingTime - elapsed);
+                
+                // Attendre le temps minimum avant de traiter la réponse
+                setTimeout(() => {
+                    // Masquer l'overlay
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                    
+                    // Marquer comme non initialisé pour permettre la ré-initialisation
+                    window.gaiaVisionInitialized = false;
+                    
+                    // Remplacer le contenu de la page avec la réponse de manière plus sûre
+                    try {
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    } catch (e) {
+                        console.error('Erreur lors du rechargement de la page:', e);
+                        // Fallback: recharger la page normalement
+                        window.location.reload();
+                    }
+                    
+                }, remaining);
+            })
+            .catch(error => {
+                console.error('Erreur complète:', error);
+                console.error('Type d\'erreur:', error.name);
+                console.error('Message d\'erreur:', error.message);
+                console.error('Stack trace:', error.stack);
+                
+                // En cas d'erreur, attendre quand même le temps minimum
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, minimumLoadingTime - elapsed);
+                
+                setTimeout(() => {
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                    document.getElementById('submitBtn').disabled = false;
+                    
+                    // Afficher un message d'erreur avec plus de détails
+                    const errorMessage = `Erreur lors de l'analyse:
+Type: ${error.name}
+Message: ${error.message}
+Détails: Consultez la console (F12) pour plus d'informations.`;
+                    alert(errorMessage);
+                    
+                    // Reset des étapes
+                    document.querySelectorAll('.step').forEach(step => {
+                        step.classList.remove('active', 'completed');
+                    });
+                    const step1 = document.getElementById('step1');
+                    if (step1) step1.classList.add('active');
+                    
+                }, remaining);
+            });
+        });
+    }
+
+    // Prévisualisation de l'image améliorée avec debug
+    console.log('🔧 Script chargé - Configuration de la prévisualisation d\'image');
+    
+    function setupImagePreview() {
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        
+        console.log('🔧 Éléments trouvés:', {
+            imageInput: imageInput ? 'OK' : 'MANQUANT',
+            imagePreview: imagePreview ? 'OK' : 'MANQUANT'
+        });
+        
+        if (imageInput && !imageInput.dataset.listenerAttached) {
+            imageInput.dataset.listenerAttached = 'true';
+            imageInput.addEventListener('change', function(e) {
+                console.log('🔧 Changement d\'image détecté');
+                const file = e.target.files[0];
+                console.log('🔧 Fichier sélectionné:', file ? file.name : 'Aucun');
+                
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        console.log('🔧 Lecture du fichier terminée');
+                        const preview = document.getElementById('imagePreview');
+                        if (preview) {
+                            console.log('🔧 Affichage de la prévisualisation');
+                            preview.innerHTML = `
+                                <div style="position: relative; display: inline-block;">
+                                    <img src="${e.target.result}" alt="Prévisualisation" 
+                                         style="max-width: 200px; max-height: 200px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                    <div style="position: absolute; top: -8px; right: -8px; background: #4caf50; color: white; 
+                                                border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; 
+                                                justify-content: center; font-size: 14px; font-weight: bold;">✓</div>
+                                </div>
+                            `;
+                        } else {
+                            console.error('🔧 Élément imagePreview non trouvé lors de l\'affichage');
+                        }
+                    };
+                    reader.onerror = function(error) {
+                        console.error('🔧 Erreur lors de la lecture du fichier:', error);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        } else if (!imageInput) {
+            console.error('🔧 Élément imageInput non trouvé');
+        } else {
+            console.log('🔧 Event listener déjà attaché à imageInput');
+        }
+    }
+    
+    // Appeler la fonction de configuration
+    setupImagePreview();
+
+    // Initialiser la date avec la date du jour
+    const dateInput = document.getElementById('jours_inoculation');
+    if (dateInput && !dateInput.value) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        dateInput.value = `${year}-${month}-${day}`;
+        console.log('📅 Date initialisée avec la date du jour:', dateInput.value);
+    }
+
+    // Gestion des dates
+    if (dateInput && !dateInput.dataset.listenerAttached) {
+        dateInput.dataset.listenerAttached = 'true';
+        dateInput.addEventListener('input', function(event) {
+            const input = event.target;
+            const value = input.value.replace(/\D/g, '');
+
+            if (value.length === 4) {
+                const jour = value.slice(0, 2);
+                const mois = value.slice(2, 4);
+                const annee = new Date().getFullYear();
+
+                const formattedDate = `${annee}-${mois.padStart(2, '0')}-${jour.padStart(2, '0')}`;
+                input.value = formattedDate;
+            }
+        });
+    }
+
+    // Synchronisation slider <-> input number pour l'hygrométrie
+    const hygroNum = document.getElementById('hygrometrie_num');
+    const hygroSlider = document.getElementById('hygrometrie_slider');
+    if (hygroNum && hygroSlider && !hygroNum.dataset.listenerAttached) {
+        hygroNum.dataset.listenerAttached = 'true';
+        hygroSlider.dataset.listenerAttached = 'true';
+        
+        hygroNum.addEventListener('input', function() {
+            hygroSlider.value = hygroNum.value;
+        });
+        hygroSlider.addEventListener('input', function() {
+            hygroNum.value = hygroSlider.value;
+        });
+    }
+
+    // Toggle des détails techniques
+    window.toggleTechnicalDetails = function() {
+        const technicalData = document.getElementById('technicalData');
+        const button = document.querySelector('.toggle-details');
+        
+        if (technicalData && button) {
+            if (technicalData.style.display === 'none') {
+                technicalData.style.display = 'block';
+                button.textContent = '🔧 Masquer les détails techniques';
+            } else {
+                technicalData.style.display = 'none';
+                button.textContent = '🔧 Afficher les détails techniques';
+            }
+        }
+    };
+    
+    // Fonction pour dessiner les détections sur l'image
+    window.toggleDetections = function() {
+        const canvas = document.getElementById('detectionCanvas');
+        const image = document.getElementById('analysisImage');
+        const button = document.querySelector('.toggle-detections');
+        
+        if (!canvas || !image || !button) {
+            console.error('🔧 Éléments de détection non trouvés');
+            return;
+        }
+        
+        const ctx = canvas.getContext('2d');
+        
+        // Toggle l'affichage
+        if (canvas.style.display === 'none') {
+            canvas.style.display = 'block';
+            button.textContent = '🎯 Masquer les détections';
+            drawDetections();
+        } else {
+            canvas.style.display = 'none';
+            button.textContent = '🎯 Afficher les détections';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    };
+    
+    function drawDetections() {
+        const canvas = document.getElementById('detectionCanvas');
+        const image = document.getElementById('analysisImage');
+        
+        if (!canvas || !image) return;
+        
+        // Vérifier si nous avons des détections
+        if (!window.detectionData || !window.detectionData.detections) {
+            console.log('🔧 Aucune détection à afficher');
+            return;
+        }
+        
+        const ctx = canvas.getContext('2d');
+        const detections = window.detectionData.detections;
+        
+        // Attendre que l'image soit chargée
+        if (image.complete && image.naturalHeight !== 0) {
+            setupCanvas();
+        } else {
+            image.onload = setupCanvas;
+        }
+        
+        function setupCanvas() {
+            // Ajuster la taille du canvas à l'image
+            canvas.width = image.offsetWidth;
+            canvas.height = image.offsetHeight;
+            
+            // Calculer les ratios de mise à l'échelle
+            const scaleX = image.offsetWidth / image.naturalWidth;
+            const scaleY = image.offsetHeight / image.naturalHeight;
+            
+            // Dessiner chaque détection
+            detections.forEach((detection, index) => {
+                const box = detection.box; // [ymin, xmin, ymax, xmax] normalisé
+                const className = detection.class_name;
+                const score = detection.score;
+                
+                // Convertir les coordonnées normalisées en pixels
+                const x1 = box[1] * image.naturalWidth * scaleX;
+                const y1 = box[0] * image.naturalHeight * scaleY;
+                const x2 = box[3] * image.naturalWidth * scaleX;
+                const y2 = box[2] * image.naturalHeight * scaleY;
+                
+                const width = x2 - x1;
+                const height = y2 - y1;
+                
+                // Couleur selon la classe
+                const color = className === 'contaminated' ? '#ff4444' : '#44ff44';
+                const textColor = '#ffffff';
+                
+                // Dessiner le rectangle
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x1, y1, width, height);
+                
+                // Fond semi-transparent pour le label
+                const label = `${className}: ${(score * 100).toFixed(1)}%`;
+                const labelPadding = 6;
+                const labelHeight = 20;
+                
+                // Mesurer le texte
+                ctx.font = '14px Arial';
+                const labelWidth = ctx.measureText(label).width + (labelPadding * 2);
+                
+                // Dessiner le fond du label
+                ctx.fillStyle = color;
+                ctx.fillRect(x1, y1 - labelHeight, labelWidth, labelHeight);
+                
+                // Dessiner le texte
+                ctx.fillStyle = textColor;
+                ctx.fillText(label, x1 + labelPadding, y1 - 6);
+                
+                // Petit cercle pour l'index
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x1 - 10, y1 + 10, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = textColor;
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText((index + 1).toString(), x1 - 10, y1 + 14);
+                ctx.textAlign = 'left';
+            });
+        }
+    }
+    
+    // === FONCTIONS HEATMAP AVEC CHARGEMENT ===
+    
+    function showHeatmapLoading(type) {
+        const loadingHtml = `
+            <div class="heatmap-loading" id="heatmapLoading">
+                <div class="heatmap-loading-content">
+                    <div class="heatmap-spinner"></div>
+                    <h3>🔥 Génération ${type === 'heatmap' ? 'Heatmap' : 'Overlay'}</h3>
+                    <p>Analyse thermique des zones de contamination en cours...<br>
+                    Traitement par intelligence artificielle</p>
+                    <div class="heatmap-progress">
+                        <div class="heatmap-progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', loadingHtml);
+    }
+    
+    function hideHeatmapLoading() {
+        const loading = document.getElementById('heatmapLoading');
+        if (loading) {
+            loading.style.opacity = '0';
+            loading.style.transform = 'scale(0.9)';
+            setTimeout(() => loading.remove(), 300);
+        }
+    }
+
+    window.generateHeatmap = function() {
+        console.log('🔥 Génération de la heatmap de contamination...');
+        
+        const imageElement = document.getElementById('analysisImage');
+        if (!imageElement) {
+            console.error('❌ Image d\'analyse non trouvée');
+            alert('❌ Image d\'analyse non trouvée. Veuillez analyser une image d\'abord.');
+            return;
+        }
+        
+        // Afficher l'indicateur de chargement
+        showHeatmapLoading('heatmap');
+        
+        // Obtenir l'image source
+        const imageSrc = imageElement.src;
+        
+        // Récupérer l'image en tant que blob pour l'envoyer au serveur Flask
+        fetch(imageSrc)
+            .then(response => response.blob())
+            .then(blob => {
+                const formData = new FormData();
+                formData.append('file', blob, 'image.jpg');
+                
+                // Utiliser l'endpoint Flask local au lieu de l'API FastAPI
+                return fetch('/heatmap', {
+                    method: 'POST',
+                    body: formData
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Masquer le chargement
+                hideHeatmapLoading();
+                
+                // Créer une URL pour l'image de heatmap
+                const heatmapUrl = URL.createObjectURL(blob);
+                
+                // Afficher la heatmap dans une modal
+                showHeatmapModal(heatmapUrl, 'heatmap');
+            })
+            .catch(error => {
+                console.error('❌ Erreur génération heatmap:', error);
+                hideHeatmapLoading();
+                alert('❌ Erreur lors de la génération de la heatmap: ' + error.message);
+            });
+    };
+    
+    window.generateOverlay = function() {
+        console.log('🎯 Génération de l\'overlay de contamination...');
+        
+        const imageElement = document.getElementById('analysisImage');
+        if (!imageElement) {
+            console.error('❌ Image d\'analyse non trouvée');
+            alert('❌ Image d\'analyse non trouvée. Veuillez analyser une image d\'abord.');
+            return;
+        }
+        
+        // Afficher l'indicateur de chargement
+        showHeatmapLoading('overlay');
+        
+        // Obtenir l'image source
+        const imageSrc = imageElement.src;
+        
+        // Récupérer l'image en tant que blob pour l'envoyer au serveur Flask
+        fetch(imageSrc)
+            .then(response => response.blob())
+            .then(blob => {
+                const formData = new FormData();
+                formData.append('file', blob, 'image.jpg');
+                
+                // Utiliser l'endpoint Flask local au lieu de l'API FastAPI
+                return fetch('/heatmap-overlay', {
+                    method: 'POST',
+                    body: formData
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Masquer le chargement
+                hideHeatmapLoading();
+                
+                // Créer une URL pour l'image d'overlay
+                const overlayUrl = URL.createObjectURL(blob);
+                
+                // Afficher l'overlay dans une modal
+                showHeatmapModal(overlayUrl, 'overlay');
+            })
+            .catch(error => {
+                console.error('❌ Erreur génération overlay:', error);
+                hideHeatmapLoading();
+                alert('❌ Erreur lors de la génération de l\'overlay: ' + error.message);
+            });
+    };
+    
+    function showHeatmapModal(imageUrl, type) {
+        // Créer une modal pour afficher la heatmap
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+        `;
+        
+        const container = document.createElement('div');
+        container.style.cssText = `
+            max-width: 90%;
+            max-height: 90%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: default;
+        `;
+        
+        const title = document.createElement('h3');
+        title.textContent = type === 'heatmap' ? '🔥 Heatmap de Contamination' : '🎯 Overlay de Contamination';
+        title.style.marginBottom = '15px';
+        
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.style.cssText = `
+            max-width: 100%;
+            max-height: 70vh;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        `;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '✖ Fermer';
+        closeBtn.style.cssText = `
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        `;
+        
+        closeBtn.onclick = () => {
+            document.body.removeChild(modal);
+            URL.revokeObjectURL(imageUrl); // Nettoyer la mémoire
+        };
+        
+        // Fermer en cliquant sur le fond
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                closeBtn.click();
+            }
+        };
+        
+        // Empêcher la fermeture en cliquant sur le contenu
+        container.onclick = (e) => {
+            e.stopPropagation();
+        };
+        
+        container.appendChild(title);
+        container.appendChild(img);
+        container.appendChild(closeBtn);
+        modal.appendChild(container);
+        document.body.appendChild(modal);
+        
+        console.log(`✅ ${type === 'heatmap' ? 'Heatmap' : 'Overlay'} affiché avec succès`);
+    }
+    
+    
+    console.log('🔧 Gaia Vision initialisé avec succès');
+})();
+</script>
+{% endblock %}
