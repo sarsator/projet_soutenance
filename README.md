@@ -1,11 +1,18 @@
-# � GaiaSense Vision - Mon Projet de Fin d'Études
+# � GaiaSense Vision - Mon```
+gaia_vision/
+├── 🧠 training/          # Notebooks de développement des modèles
+├── 🔌 api/              # Backend FastAPI avec système de versioning
+├── 🌐 frontend/         # Interface web avec Flask
+├── 📊 data_trie_utils/  # Pipeline de données et preprocessing
+└── 🖼️ api/images_a_traiter/ # Dataset d'images pour les tests
+```de Fin d'Études
 
 Salut ! Bienvenue sur mon projet de soutenance pour Alyra. J'ai développé GaiaSense Vision, une solution IA complète qui combine machine learning classique et deep learning pour l'analyse d'images.
 
 ## 🎯 Qu'est-ce que c'est ?
 
 En gros, c'est un système intelligent qui peut :
-- **Analyser des images** avec un modèle EfficientNetB0 fine-tuné
+- **Analyser des images** avec un modèle SSD MobileNet V2 pour la détection d'objets
 - **Traiter des données tabulaires** avec CatBoost (mon algo favori pour ce type de données)
 - **Déployer automatiquement** les modèles avec un système de versioning maison
 - **Servir le tout** via une API REST moderne avec FastAPI
@@ -37,13 +44,13 @@ gaia_vision/
 
 **Machine Learning :**
 - 🐱 **CatBoost** pour les données tabulaires (gère naturellement les catégorielles)
-- 🔥 **EfficientNetB0** pour la vision (excellent rapport performance/taille)
+- 🔥 **SSD MobileNet V2** pour la détection d'objets (optimisé pour la production)
 - 📊 **Scikit-learn** pour les métriques et la validation
 
 **Backend :**
 - ⚡ **FastAPI** pour l'API (auto-documentation Swagger incluse)
 - 🗄️ **SQLite** pour les prédictions et logs
-- 📦 **Joblib/Keras** pour la sérialisation des modèles
+- 📦 **Joblib/TensorFlow SavedModel** pour la sérialisation des modèles
 
 **Frontend :**
 - 🌶️ **Flask** pour l'interface web
@@ -69,29 +76,28 @@ cd gaia_vision
 pip install -r requirements.txt
 ```
 
-3. **Lance l'API**
+3. **Lance le système complet**
 ```bash
-cd api
-python main.py
+python start.py
 ```
 
-4. **Lance le frontend** (dans un autre terminal)
-```bash
-cd frontend
-python app.py
-```
+4. **Go to** http://localhost:5000 et test !
 
-5. **Go to** http://localhost:5000 et test !
+5. **Arrêt propre du système**
+```bash
+python stop.py
+```
 
 ## 📈 Performances
 
-**Modèle Vision (EfficientNetB0) :**
-- Accuracy : ~92% sur le test set
-- Temps d'inférence : ~200ms par image
-- Taille du modèle : ~56MB
+**Modèle Vision (SSD MobileNet V2) :**
+- F1-Score : ~60% sur le test set
+- Temps d'inférence : ~150ms par image
+- Taille du modèle : ~23MB
+- Détection d'objets : champignons sains/contaminés
 
 **Modèle ML (CatBoost) :**
-- Accuracy : ~89% en validation croisée
+- Accuracy : ~85% en validation croisée
 - Temps d'inférence : ~50ms par prédiction
 - Features importantes : analysées et documentées
 
@@ -103,6 +109,17 @@ Ce projet montre mes compétences en :
 - **Choix technologiques** justifiés et pragmatiques
 - **Expérience utilisateur** (interface intuitive)
 - **Qualité du code** (documentation, structure, bonnes pratiques)
+
+## 👥 Équipe & Remerciements
+
+**Équipe de développement :**
+- **Développeur principal** : Développeur & Consultant IA
+- **Maxime Cadieux** : Consultant IA - [maxcadieux@gmail.com](mailto:maxcadieux@gmail.com)
+- **Namisita Bakayoko** : Consultant IA - [naminsita.bakayoko@gmail.com](mailto:naminsita.bakayoko@gmail.com)
+
+**Remerciements spéciaux :**
+- **CENTER FOR AGRIC-BUSINESS INNOVATIONS** - [WhatsApp: +237 98257837](https://wa.me/237982578375)
+- *Merci pour leur temps précieux et la fourniture des photos d'entraînement essentielles au développement des modèles IA*
 
 ## 🤝 Contact
 
