@@ -15,11 +15,14 @@ class Config:
     HOST = os.getenv("HOST", "0.0.0.0")
     PORT = int(os.getenv("PORT", 8000))
     DEBUG = os.getenv("DEBUG", "false").lower() == "true"
+
+    #variables d'environnement
+    valeur_min_catboost = 0.12  # Seuil pour CatBoost, peut être modifié via .env
     
     # Paths
     BASE_DIR = Path(__file__).parent.parent
     UPLOAD_DIR = BASE_DIR / "api" / "images_a_traiter"
-    PROCESSED_DIR = BASE_DIR / "images_traitees"
+    PROCESSED_DIR = BASE_DIR / "api" / "images_traitees"
     
     # Model Paths (utilisation du système de versioning)
     MODELS_BASE_DIR = BASE_DIR / "api" / "models"

@@ -1,0 +1,24 @@
+{
+  "version": "1.5",
+  "timestamp": "2025-07-16T20:29:17.571613",
+  "model_type": "dl",
+  "deployed_at": "2025-07-16 20:29:17",
+  "deployment_id": "20250716_202917",
+  "architecture": "SSD MobileNet V2",
+  "input_size": "320x320",
+  "classes": [
+    "background",
+    "healthy",
+    "contaminated"
+  ],
+  "detection_threshold": 0.12,
+  "framework": "TensorFlow Object Detection API",
+  "deployment_reason": "Déploiement automatique via CLI - 2025-07-16 20:29:17",
+  "cli_deployment": true,
+  "model_file": "saved_model",
+  "model_size_bytes": 23936569,
+  "model_size_mb": 22.83,
+  "source_path": "/home/sarsator/projets/gaia_vision/api/models/dl_model/versions/v1.4_20250716_202612/saved_model",
+  "deployed_path": "/home/sarsator/projets/gaia_vision/api/models/dl_model/versions/v1.5_20250716_202917/saved_model",
+  "model_format": "SavedModel"
+}

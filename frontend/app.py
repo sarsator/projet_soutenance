@@ -49,6 +49,17 @@ def load_json(file_name):
     with open(file_path, encoding="utf-8") as f:
         return json.load(f)
 
+@app.route("/about")
+def about():
+    """
+    Route pour la page "À propos" - affiche les informations sur les fonctionnalités.
+    """
+    # Gestion de la langue (français par défaut)
+    lang_code = request.args.get("lang", "fr")
+    lang = load_json(f"{lang_code}.json")
+    
+    return render_template("about.html", lang=lang)
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     """
@@ -228,7 +239,7 @@ def generate_heatmap():
             
             # Charger le modèle et faire la prédiction
             model = VisionModel()
-            if not model.load_model():
+            if not model.charger_modele():
                 return {"error": "Impossible de charger le modèle de vision"}, 500
             
             # Obtenir les détections
@@ -348,7 +359,7 @@ def generate_heatmap_overlay():
             
             # Charger le modèle et faire la prédiction
             model = VisionModel()
-            if not model.load_model():
+            if not model.charger_modele():
                 return {"error": "Impossible de charger le modèle de vision"}, 500
             
             # Obtenir les détections

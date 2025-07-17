@@ -7,7 +7,7 @@ Hey ! Voici la doc de mon API. J'ai essayé de faire quelque chose de propre et 
 Mon système combine deux approches complémentaires :
 
 1. **CatBoost pour les paramètres** : Race, substrat, hygrométrie, CO2... Parfait pour les données structurées
-2. **Vision avec EfficientNetB0** : Analyse visuelle des champignons pour détecter les contaminations
+2. **Vision avec SSD MobileNet V2** : Détection d'objets pour identifier les champignons contaminés/sains
 
 ### Comment ça marche concrètement ?
 
@@ -40,7 +40,7 @@ cp .env.example .env
 
 ### Étape 4 : Vérifier que les modèles sont là
 - Modèle CatBoost : `api/models/ml_model/model_catboost_best.joblib`
-- Modèle Vision : `api/models/dl_model/final_model.keras`
+- Modèle Vision : `api/models/dl_model/current/` (SSD MobileNet V2)
 
 Si ils sont pas là, il faut les entraîner avec les notebooks !
 
@@ -74,7 +74,7 @@ Vérification de l'état des modèles ML
 Documentation de base de l'API
 
 ### POST `/predict-image`
-Prédiction complète avec image (CatBoost + Vision)
+Prédiction complète avec image (CatBoost + SSD Vision)
 
 **Paramètres :**
 - `Authorization` (header) : `Bearer <API_KEY>`
@@ -140,10 +140,16 @@ print(f"Confiance: {result['confidence']}")
     "vision_prediction": {
       "prediction": "sain",
       "confidence": 0.95,
-      "model_type": "vision"
+      "model_type": "ssd_object_detection",
+      "detection_summary": {
+        "total_detections": 3,
+        "contaminated_count": 0,
+        "healthy_count": 3,
+        "max_healthy_score": 0.95
+      }
     },
-    "models_used": ["catboost", "vision"],
-    "analysis_steps": ["catboost_analysis", "vision_analysis"]
+    "models_used": ["catboost", "ssd_vision"],
+    "analysis_steps": ["catboost_analysis", "ssd_vision_analysis"]
   },
   "input_parameters": {
     "race_champignon": "Pleurotus ostreatus",

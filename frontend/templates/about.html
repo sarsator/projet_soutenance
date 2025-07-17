@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}À propos - GaïaSense Vision{% endblock %}
+
+{% block content %}
+<div class="about-container">
+    <h1> À propos de GaïaSense Vision</h1>
+    
+    <div class="about-section">
+        <h2>Intelligence Artificielle Avancée</h2>
+        <p>GaïaSense Vision utilise un système hybride d'intelligence artificielle pour analyser vos cultures de champignons avec une précision optimale.</p>
+        
+        <div class="models-grid">
+            <div class="model-card">
+                <h3>🧮 CatBoost (Machine Learning)</h3>
+                <p><strong>Spécialité :</strong> Analyse des paramètres environnementaux</p>
+                <ul>
+                    <li>Race de champignon</li>
+                    <li>Type de substrat</li>
+                    <li>Conditions d'hygrométrie</li>
+                    <li>Taux de CO2</li>
+                    <li>Nombre de jours depuis inoculation</li>
+                </ul>
+                <p><strong>Performance :</strong> ~85% de précision sur les paramètres</p>
+            </div>
+            
+            <div class="model-card">
+                <h3>🔍 SSD MobileNet V2 (Vision)</h3>
+                <p><strong>Spécialité :</strong> Détection d'objets et analyse visuelle</p>
+                <ul>
+                    <li>Détection de champignons sains</li>
+                    <li>Identification de contaminations</li>
+                    <li>Analyse visuelle des sacs</li>
+                    <li>Boîtes de délimitation précises</li>
+                </ul>
+                <p><strong>Performance :</strong> ~60% de précision sur l'analyse visuelle</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="about-section">
+        <h2>Fonctionnalités Intelligentes</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Analyse Orchestrée</h3>
+                <p>Le système décide intelligemment quand utiliser l'analyse visuelle en fonction des résultats du modèle CatBoost.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>Transparence Totale</h3>
+                <p>Vous savez toujours quel modèle a généré le résultat et avec quel niveau de confiance.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>Détection Précise</h3>
+                <p>Identification des objets contaminés et sains avec boîtes de délimitation et scores de confiance.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>Optimisation Ressources</h3>
+                <p>L'analyse visuelle n'est déclenchée que lorsque nécessaire, optimisant les performances.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="about-section">
+        <h2>Processus d'Analyse</h2>
+        <ol class="process-steps">
+            <li><strong>Analyse CatBoost :</strong> Évaluation des paramètres environnementaux</li>
+            <li><strong>Décision Intelligente :</strong> Déclenchement de l'analyse visuelle si risque détecté</li>
+            <li><strong>Analyse SSD Vision :</strong> Détection d'objets et classification sain/contaminé</li>
+            <li><strong>Synthèse :</strong> Combinaison des résultats pour un diagnostic final</li>
+        </ol>
+    </div>
+
+    <div class="about-section">
+        <h2>Performances et Métriques</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>CatBoost</h3>
+                <p class="metric-value">85.2%</p>
+                <p class="metric-label">Précision moyenne</p>
+            </div>
+            
+            <div class="metric-card">
+                <h3>SSD Vision</h3>
+                <p class="metric-value">58.3%</p>
+                <p class="metric-label">F1-Score</p>
+            </div>
+            
+            <div class="metric-card">
+                <h3>Système Hybride</h3>
+                <p class="metric-value">~75%</p>
+                <p class="metric-label">Performance globale</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="about-section">
+        <h2>Architecture Technique</h2>
+        <div class="tech-info">
+            <h3>Backend</h3>
+            <ul>
+                <li>FastAPI pour les endpoints</li>
+                <li>TensorFlow pour le modèle SSD</li>
+                <li>CatBoost pour l'analyse ML</li>
+                <li>Python 3.10+</li>
+            </ul>
+            
+            <h3>Frontend</h3>
+            <ul>
+                <li>Flask pour l'interface web</li>
+                <li>HTML5 responsive</li>
+                <li>CSS3 avec animations</li>
+                <li>JavaScript pour interactions</li>
+            </ul>
+        </div>
+    </div>
+
+        <div class="about-section">
+        <h2>Améliorations Récentes</h2>
+        <div class="improvements-timeline">
+            <div class="improvement-item">
+                <h3>v1.5 - Juillet 2025</h3>
+                <ul>
+                    <li>Déploiement du modèle SSD MobileNet V2</li>
+                    <li>Système de versioning automatique</li>
+                    <li>Amélioration de la précision visuelle</li>
+                </ul>
+            </div>
+            
+            <div class="improvement-item">
+                <h3>v1.4 - Juin 2025</h3>
+                <ul>
+                    <li>Interface utilisateur repensée</li>
+                    <li>Indicateurs de confiance améliorés</li>
+                    <li>Optimisation des performances</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="about-section">
+        <h2>👥 Équipe & Remerciements</h2>
+        
+        <div class="team-section">
+            <h3>🧑‍💻 Équipe de Développement</h3>
+            <div class="team-grid">
+                                
+                <div class="team-member">
+                    <h4>Maxime Cadieux</h4>
+                    <p><strong>Email :</strong> <a href="mailto:maxcadieux@gmail.com">maxcadieux@gmail.com</a></p>
+                    <p><strong>Rôle :</strong> Consultant IA</p>
+                </div>
+                
+                <div class="team-member">
+                    <h4>Namisita Bakayoko</h4>
+                    <p><strong>Email :</strong> <a href="mailto:naminsita.bakayoko@gmail.com">naminsita.bakayoko@gmail.com</a></p>
+                    <p><strong>Rôle :</strong> Consultant IA</p>
+                </div>
+                <div class="team-member">
+                    <h4>Davy Abderrahman</h4>
+                    <p><strong>Email :</strong> <a href="mailto:sarsator@gmail.com">sarsator@gmail.com</a></p>
+                    <p><strong>Rôle :</strong> Développeur IA</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="acknowledgments-section">
+            <h3>🙏 Remerciements Spéciaux</h3>
+            <div class="acknowledgment-card">
+                <h4>CENTER FOR AGRIC-BUSINESS INNOVATIONS</h4>
+                <p><strong>Contact WhatsApp :</strong> <a href="https://wa.me/237982578375">+237 98257837</a></p>
+                <p><strong>Contribution :</strong> Merci pour leur temps précieux et la fourniture des photos essentielles pour l'entraînement des modèles d'intelligence artificielle.</p>
+                <p><em>Sans leur collaboration, ce projet n'aurait pas pu voir le jour avec cette qualité d'analyse.</em></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="about-footer">
+        <p><a href="/" class="btn-primary">← Retour à l'analyse</a></p>
+        <p><small>GaïaSense Vision - Système d'analyse intelligent pour cultures de champignons</small></p>
+    </div>
+</div>
+{% endblock %}

@@ -93,7 +93,7 @@ class VisionModel:
             logger.info("📁 Fallback vers modèle legacy")
             return fallback_path 
         
-    def load_model(self) -> bool:
+    def charger_modele(self) -> bool:
         """
         Charge le modèle de vision depuis le fichier.
         Supporte maintenant les formats Keras et SavedModel.
@@ -275,7 +275,7 @@ class VisionModel:
             Dict contenant la prédiction et la confiance
         """
         if self.model is None:
-            if not self.load_model():
+            if not self.charger_modele():
                 raise RuntimeError("Impossible de charger le modèle de vision")
         
         try:
@@ -323,7 +323,7 @@ class VisionModel:
             
             for i in range(min(num_detections, len(detection_scores))):
                 score = float(detection_scores[i])
-                if score > 0.12:  # Seuil très bas à 0.12 pour capturer la contamination faible
+                if score > 0.08:  # Seuil encore plus bas à 0.08 pour capturer la contamination très faible
                     class_id = int(detection_classes[i])
                     box = detection_boxes[i].tolist()
                     
@@ -352,57 +352,56 @@ class VisionModel:
                 logger.info(f"💀 Meilleur score contaminé: {max_contaminated_score:.3f}")
                 logger.info(f"✅ Meilleur score sain: {max_healthy_score:.3f}")
                 
-                # NOUVELLE LOGIQUE : La contamination prend la priorité même avec des scores modérés
-                if max_contaminated_score >= 0.12:  # Seuil très bas pour contamination
-                    if max_contaminated_score >= 0.18:  # Score raisonnable
-                        prediction = "contamine"
-                        confidence = max_contaminated_score * 2.2  # Amplification forte
-                        contamination_probability = max_contaminated_score * 1.8
-                    elif max_contaminated_score >= 0.14:  # Score faible mais significatif
-                        prediction = "contamine"
-                        confidence = max_contaminated_score * 2.8  # Amplification forte pour compensation
-                        contamination_probability = max_contaminated_score * 2.0
-                    else:  # Score très faible mais détection multiple
-                        if contaminated_count >= 2:  # Plusieurs détections = plus fiable
-                            prediction = "contamine"
-                            confidence = max_contaminated_score * 3.5  # Amplification très forte
-                            contamination_probability = max_contaminated_score * 2.5
-                        else:
-                            prediction = "incertain"  # Prudence mais signaler le risque
-                            confidence = 0.45  # Confiance modérée
-                            contamination_probability = 0.7  # Forte probabilité de contamination
-                            logger.warning("⚠️ Contamination détectée avec score faible - ATTENTION")
+                # LOGIQUE CORRIGÉE : Seuils plus stricts pour éviter les faux positifs
+                if max_contaminated_score >= 0.25:  # Seuil raisonnable pour contamination réelle
+                    prediction = "contamine"
+                    confidence = max_contaminated_score * 1.5  # Amplification modérée
+                    contamination_probability = max_contaminated_score * 1.3
+                elif max_contaminated_score >= 0.15:  # Score modéré = incertain
+                    prediction = "incertain"
+                    confidence = max_contaminated_score * 1.2
+                    contamination_probability = max_contaminated_score * 1.5
+                    logger.warning(f"⚠️ Contamination possible détectée: score={max_contaminated_score:.3f}")
+                else:  # Score faible (<15%) = privilégier le sain
+                    if max_healthy_score > max_contaminated_score:
+                        prediction = "sain"
+                        # Booster la confiance pour les objets sains
+                        if max_healthy_score < 0.2:  # Score très faible
+                            confidence = max_healthy_score * 2.5  # Amplification forte
+                        else:  # Score modéré
+                            confidence = max_healthy_score * 1.5  # Amplification modérée
                         
-                    # Cap à 85% pour éviter la sur-confiance mais rester dans le raisonnable
-                    confidence = min(confidence, 0.85)
-                    contamination_probability = min(contamination_probability, 0.90)
-                    
-                else:
-                    # Scores vraiment trop faibles, privilégier le sain
-                    prediction = "sain"
-                    confidence = max_healthy_score * 0.8
-                    contamination_probability = 1.0 - max_healthy_score
+                        confidence = min(confidence, 0.75)  # Cap à 75%
+                        contamination_probability = max_contaminated_score  # Garder trace du risque faible
+                    else:
+                        prediction = "incertain"
+                        confidence = 0.3
+                        contamination_probability = 0.4
+                        
+                # Cap à 90% pour éviter la sur-confiance
+                confidence = min(confidence, 0.90)
+                contamination_probability = min(contamination_probability, 0.95)
                         
             elif contaminated_count > 0:
-                # Seulement des contaminations détectées - PRIORISER LA DÉTECTION
+                # Seulement des contaminations détectées - LOGIQUE PLUS STRICTE
                 logger.info(f"☠️ Contamination pure détectée: score max {max_contaminated_score:.3f}")
                 
-                if max_contaminated_score >= 0.18:
+                if max_contaminated_score >= 0.30:  # Seuil élevé pour contamination pure
                     prediction = "contamine"
-                    confidence = max_contaminated_score * 2.2  # Amplification forte
-                elif max_contaminated_score >= 0.14:
+                    confidence = max_contaminated_score * 1.3
+                elif max_contaminated_score >= 0.20:  # Seuil modéré
                     prediction = "contamine"
-                    confidence = max_contaminated_score * 2.8  # Amplification forte
-                elif max_contaminated_score >= 0.10:
-                    prediction = "contamine"
-                    confidence = max_contaminated_score * 3.5  # Amplification très forte pour faibles scores
-                else:
-                    prediction = "incertain"
                     confidence = max_contaminated_score * 1.5
+                elif max_contaminated_score >= 0.15:  # Seuil bas = incertain
+                    prediction = "incertain"
+                    confidence = max_contaminated_score * 1.2
+                else:  # Très faible score = probablement sain
+                    prediction = "sain"
+                    confidence = 0.6  # Confiance modérée par défaut
                 
                 # Cap à 85%
                 confidence = min(confidence, 0.85)
-                contamination_probability = min(max_contaminated_score * 2.2, 0.90)
+                contamination_probability = min(max_contaminated_score * 1.8, 0.90)
                 
             elif healthy_count > 0:
                 # Seulement des objets sains détectés - VÉRIFICATION SUPPLÉMENTAIRE
@@ -433,12 +432,22 @@ class VisionModel:
                             contamination_probability = 1.0 - max_healthy_score
                     else:
                         prediction = "sain"
-                        confidence = max_healthy_score * 0.9  # Réduction car score modéré
+                        # Booster encore plus la confiance pour les objets sains
+                        if max_healthy_score < 0.15:  # Score très faible
+                            confidence = max_healthy_score * 4.0  # Amplification très forte
+                        elif max_healthy_score < 0.3:  # Score modéré  
+                            confidence = max_healthy_score * 3.0  # Amplification forte
+                        else:  # Score correct
+                            confidence = max_healthy_score * 2.0  # Amplification modérée
+                        
+                        # Cap à 75% pour éviter sur-confiance
+                        confidence = min(confidence, 0.75)
                         contamination_probability = 1.0 - max_healthy_score
                 else:
                     # Score healthy élevé (>= 0.7), on peut faire confiance
                     prediction = "sain"
-                    confidence = max_healthy_score
+                    confidence = max_healthy_score * 1.1  # Légère amplification
+                    confidence = min(confidence, 0.85)  # Cap à 85%
                     contamination_probability = 1.0 - max_healthy_score
                 
             else:
@@ -580,6 +589,6 @@ class VisionModel:
             logger.error(f"Erreur lors de la prédiction Keras: {e}")
             raise
     
-    def is_loaded(self) -> bool:
+    def est_charge(self) -> bool:
         """Vérifie si le modèle est chargé"""
         return self.model is not None

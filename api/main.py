@@ -43,36 +43,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
-from uuid import uuid4
-from pathlib import Path
-import sys
-
-# Import des modules custom (j'ai organisé le code en modules)
-current_dir = Path(__file__).parent
-parent_dir = current_dir.parent
-sys.path.insert(0, str(parent_dir))
-
-from api.utils.prediction_service import PredictionService
-from api.config import config
-
-# Chargement des variables d'environnement
-load_dotenv()
-
-# Configuration du logging (j'aime bien savoir ce qui se passe)
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Variables globales
-API_KEY = config.API_KEY
-UPLOAD_DIR = config.UPLOAD_DIR
-config.create_directories()  # Création des dossiers si ils existent pas
-
-# Création de l'app FastAPI avec metadata
-app = FastAPI(
-    title="� Gaia Vision API", 
-    version="1.0.0",
-    description="API d'analyse de contamination de champignons - Projet de soutenance Alyra"
-)
 
 # Initialisation du service de prédiction (le cœur du système)
 logger.info("🌱 Initialisation du service de prédiction...")
@@ -294,7 +264,7 @@ async def startup_event():
     
     # Précharger les modèles
     try:
-        if prediction_service.load_models():
+        if prediction_service.charger_modeles():
             logger.info("Modèles préchargés avec succès")
         else:
             logger.warning("Certains modèles n'ont pas pu être chargés")
@@ -370,7 +340,7 @@ async def generate_heatmap(
         
         # Charger le modèle et faire la prédiction
         model = VisionModel()
-        if not model.load_model():
+        if not model.charger_modele():
             raise HTTPException(status_code=500, detail="Impossible de charger le modèle de vision")
         
         # Obtenir les détections
@@ -448,7 +418,7 @@ async def generate_heatmap_overlay(
         
         # Charger le modèle et faire la prédiction
         model = VisionModel()
-        if not model.load_model():
+        if not model.charger_modele():
             raise HTTPException(status_code=500, detail="Impossible de charger le modèle de vision")
         
         # Obtenir les détections
@@ -488,6 +458,119 @@ async def generate_heatmap_overlay(
             except:
                 pass
         raise HTTPException(status_code=500, detail=f"Erreur lors de la génération de l'overlay: {str(e)}")
+
+@app.post("/reload-models")
+def reload_models(x_api_key: str = Header(None)):
+    """
+    Force le rechargement des modèles (utile après un changement de version)
+    """
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Clé API invalide")
+    
+    try:
+        logger.info("🔄 Demande de rechargement des modèles...")
+        
+        # Vérifier d'abord la synchronisation
+        sync_status = prediction_service.check_models_version_sync()
+        
+        # Recharger les modèles
+        reload_success = prediction_service.recharger_modeles()
+        
+        if reload_success:
+            # Récupérer les nouvelles versions
+            versions = prediction_service.get_model_versions()
+            logger.info(f"✅ Rechargement réussi. Nouvelles versions: {versions}")
+            
+            return {
+                "success": True,
+                "message": "Modèles rechargés avec succès",
+                "versions": versions,
+                "was_synchronized": sync_status,
+                "timestamp": "2025-07-16T20:35:00"
+            }
+        else:
+            logger.error("❌ Échec du rechargement des modèles")
+            return {
+                "success": False,
+                "message": "Échec du rechargement des modèles",
+                "error": "Impossible de recharger les modèles"
+            }
+            
+    except Exception as e:
+        logger.error(f"❌ Erreur lors du rechargement: {e}")
+        return {
+            "success": False,
+            "message": "Erreur lors du rechargement",
+            "error": str(e)
+        }
+
+@app.get("/models/versions")
+def get_model_versions(x_api_key: str = Header(None)):
+    """
+    Récupère les versions actuelles des modèles
+    """
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Clé API invalide")
+    
+    try:
+        versions = prediction_service.get_model_versions()
+        sync_status = prediction_service.check_models_version_sync()
+        
+        return {
+            "success": True,
+            "versions": versions,
+            "synchronized": sync_status,
+            "timestamp": "2025-07-16T20:35:00"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erreur récupération versions: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@app.get("/models/sync-check")
+def check_models_sync(x_api_key: str = Header(None)):
+    """
+    Vérifie si les modèles chargés correspondent aux versions actuelles
+    """
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Clé API invalide")
+    
+    try:
+        sync_status = prediction_service.check_models_version_sync()
+        versions = prediction_service.get_model_versions()
+        
+        # Obtenir les détails de synchronisation
+        if prediction_service.version_manager:
+            current_dl = prediction_service.version_manager.obtenir_version_actuelle("dl_model")
+            current_ml = prediction_service.version_manager.obtenir_version_actuelle("ml_model")
+            
+            return {
+                "success": True,
+                "synchronized": sync_status,
+                "loaded_versions": versions,
+                "current_versions": {
+                    "vision": f"v{current_dl}",
+                    "catboost": f"v{current_ml}"
+                },
+                "recommendation": "Utilisez /reload-models si non synchronisé" if not sync_status else "Modèles synchronisés"
+            }
+        else:
+            return {
+                "success": True,
+                "synchronized": True,
+                "loaded_versions": versions,
+                "note": "Gestionnaire de versions non disponible"
+            }
+            
+    except Exception as e:
+        logger.error(f"❌ Erreur vérification sync: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 if __name__ == "__main__":
     import uvicorn

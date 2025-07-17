@@ -1,21 +1,93 @@
-﻿# Fichiers à ignorer
+﻿# =============================================================================
+# GAIA VISION - Configuration Git Ignore
+# =============================================================================
+
+# ========== ENVIRONNEMENT PYTHON ==========
 .venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.so
 .env
-db/predictions.db
+.env.local
+.env.production
+
+# ========== DONNÉES ET UPLOADS ==========
+# Images à traiter par l'API
 api/images_a_traiter/*
-images_traitees/*
-training/models/*
-training/data/*
-# >>> GAIA VISION IGNORES >>>
-*.keras
-*.joblib
+!api/images_a_traiter/.gitkeep
+
+# Images traitées
+api/images_traitees/*
+!api/images_traitees/.gitkeep
+
+# Uploads frontend
 frontend/static/uploads/*
-# <<<
-training/data/DL_data/*
-# modèles DL/TensorFlow
+!frontend/static/uploads/.gitkeep
+
+# ========== MODÈLES ML/DL ==========
+# Modèles CatBoost
+*.joblib
+
+# Modèles TensorFlow/Keras
 *.keras
 *.h5
 *.pb
+*.tflite
+
+# Checkpoints TensorFlow
+checkpoint
+*.ckpt
+*.ckpt.*
+
+# ========== DONNÉES D'ENTRAÎNEMENT ==========
+training/data/*
+!training/data/.gitkeep
+
+training/models/*
+!training/models/.gitkeep
+
+# Données spécifiques DL
+training/data/DL_data/*
+!training/data/DL_data/.gitkeep
+
+# Anciens notebooks
 training/notebook/old/*
+!training/notebook/old/.gitkeep
+
+# ========== BASE DE DONNÉES ==========
+db/predictions.db
+*.db
+*.sqlite
+*.sqlite3
+
+# ========== LOGS ET CACHE ==========
+logs/*.log
+tensorboard.log
+*.log
+
+# Cache système
+.DS_Store
+Thumbs.db
+*.tmp
+*.cache
+
+# ========== IDE ET ÉDITEURS ==========
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ========== DOCUMENTATION TEMPORAIRE ==========
+*.md.backup
+*.md.tmp
+
+# ========== TESTS ET DÉVELOPPEMENT ==========
+coverage/
+.coverage
+.pytest_cache/
+.tox/
+htmlcov/

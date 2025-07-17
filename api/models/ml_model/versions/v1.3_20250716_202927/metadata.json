@@ -1,0 +1,24 @@
+{
+  "version": "1.3",
+  "timestamp": "2025-07-16T20:29:27.530570",
+  "model_type": "ml",
+  "deployed_at": "2025-07-16 20:29:27",
+  "deployment_id": "20250716_202927",
+  "algorithm": "CatBoost Classifier",
+  "features": [
+    "race_champignon",
+    "type_substrat",
+    "jours_inoculation",
+    "hygrometrie",
+    "co2_ppm"
+  ],
+  "framework": "CatBoost",
+  "deployment_reason": "Déploiement automatique via CLI - 2025-07-16 20:29:27",
+  "cli_deployment": true,
+  "model_file": "model_catboost_best.joblib",
+  "model_size_bytes": 649104,
+  "model_size_mb": 0.62,
+  "source_path": "/home/sarsator/projets/gaia_vision/api/models/ml_model/versions/v1.2_20250716_202522/model_catboost_best.joblib",
+  "deployed_path": "/home/sarsator/projets/gaia_vision/api/models/ml_model/versions/v1.3_20250716_202927/model_catboost_best.joblib",
+  "model_format": "Joblib"
+}

@@ -1,0 +1,30 @@
+{
+  "version": "1.3",
+  "timestamp": "2025-07-16T20:22:07.342976",
+  "model_type": "dl",
+  "deployed_at": "2025-07-16 20:22:07",
+  "deployment_id": "20250716_202207",
+  "architecture": "SSD MobileNet V2",
+  "input_size": "320x320",
+  "classes": [
+    "background",
+    "healthy",
+    "contaminated"
+  ],
+  "detection_threshold": 0.12,
+  "training_steps": 30000,
+  "framework": "TensorFlow Object Detection API",
+  "model_format": "SavedModel",
+  "deployment_reason": "Version update with improved heatmap integration",
+  "performance_improvements": [
+    "Optimized contamination detection threshold",
+    "Enhanced heatmap generation",
+    "Better integration with web interface"
+  ],
+  "version_notes": "Production deployment with heatmap visualization system",
+  "model_file": "saved_model",
+  "model_size_bytes": 23936569,
+  "model_size_mb": 22.83,
+  "source_path": "/home/sarsator/projets/gaia_vision/api/models/dl_model/versions/v1.3_20250716_132518/saved_model",
+  "deployed_path": "/home/sarsator/projets/gaia_vision/api/models/dl_model/versions/v1.3_20250716_202207/saved_model"
+}

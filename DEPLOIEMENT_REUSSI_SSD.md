@@ -1,6 +1,6 @@
-# ✅ DÉPLOIEMENT RÉUSSI - Modèle SSD MobileNet V2
+#  DÉPLOIEMENT RÉUSSI - Modèle SSD MobileNet V2
 
-## 📋 Résumé du Déploiement
+##  Résumé du Déploiement
 
 **Date**: 2025-07-16 13:44  
 **Version déployée**: v1.3_20250716_132518  
@@ -8,7 +8,7 @@
 **Taille**: 22.8 MB  
 **Format**: TensorFlow SavedModel  
 
-## 🎯 Performances
+##  Performances
 
 - **F1-Score**: 97.9%
 - **Précision**: Haute performance sur détection de contamination
@@ -28,26 +28,26 @@
         └── deployment_log.json   # Log de déploiement
 ```
 
-### 2. Classe VisionModel Modifiée
-- ✅ Support dual: Keras + SavedModel
-- ✅ Détection automatique du format
-- ✅ Compatibilité ascendante maintenue
-- ✅ Préprocessing adaptatif selon le modèle
+### 2. Classe VisionModel Optimisée
+- ✅ Architecture SSD MobileNet V2 déployée
+- ✅ Format TensorFlow SavedModel
+- ✅ Détection d'objets haute performance
+- ✅ Preprocessing optimisé pour SSD
 
 ### 3. API Endpoints
-- ✅ `/health`: Tous modèles chargés
-- ✅ `/predict-image`: Prédiction orchestrée
-- ✅ Format de réponse unifié
+- ✅ `/health`: Modèles CatBoost et SSD chargés
+- ✅ `/predict-image`: Prédiction hybride CatBoost + SSD
+- ✅ Format de réponse unifié avec métadonnées
 
-## 🚀 État des Services
+##  État des Services
 
 ### API (Port 8000)
 ```bash
 Status: ✅ ONLINE
 Models: 
-  - CatBoost: ✅ Loaded
-  - Vision (SSD): ✅ Loaded
-GPU: NVIDIA GeForce RTX 4080 (13.5GB)
+  - CatBoost: ✅ Loaded (Machine Learning)
+  - Vision (SSD): ✅ Loaded (Détection d'objets)
+GPU: NVIDIA GeForce RTX 4080 
 ```
 
 ### Frontend (Port 5000)
@@ -57,16 +57,16 @@ Interface: http://localhost:5000
 Connexion API: ✅ Fonctionnelle
 ```
 
-## 📊 Fonctionnalités Déployées
+##  Fonctionnalités Déployées
 
-### Détection d'Objects
+### Détection d'Objets (SSD)
 - Champignons contaminés/sains
 - Support multi-sacs
 - Scores de confiance précis
 - Boîtes de délimitation
 
-### Prédiction Orchestrée
-- CatBoost (paramètres) + SSD (vision)
+### Prédiction Hybride
+- CatBoost (analyse paramètres) + SSD (analyse visuelle)
 - Logique de décision intelligente
 - Métadonnées complètes
 - Traçabilité des modèles
@@ -104,17 +104,17 @@ curl -X POST "http://localhost:8000/predict-image" \
   -F "co2_ppm=800.0"
 ```
 
-## 📈 Améliorations Apportées
+##  Améliorations Apportées
 
-1. **Performance**: Passage à SSD MobileNet V2 (97.9% F1-Score)
-2. **Architecture**: SavedModel pour meilleure compatibilité TensorFlow
+1. **Performance**: Déploiement SSD MobileNet V2 (97.9% F1-Score)
+2. **Architecture**: TensorFlow SavedModel pour la production
 3. **Déploiement**: Système de versioning automatique
 4. **Monitoring**: Logs détaillés et métadonnées complètes
-5. **Robustesse**: Support dual format avec fallback
+5. **Hybridation**: CatBoost (ML) + SSD (Vision) pour prédictions optimales
 
-## 🎉 Résultat Final
+##  Résultat Final
 
-Le nouveau modèle SSD MobileNet V2 est **OPÉRATIONNEL** et intégré avec succès dans l'API Gaia Vision. Le système de versioning permet de gérer facilement les futures mises à jour du modèle.
+Le système hybride **CatBoost + SSD MobileNet V2** est **OPÉRATIONNEL** et intégré avec succès dans l'API Gaia Vision. Le système de versioning permet de gérer facilement les futures mises à jour des modèles.
 
 **Interface Web**: http://localhost:5000  
 **API Swagger**: http://localhost:8000/docs

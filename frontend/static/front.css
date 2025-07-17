@@ -1312,3 +1312,405 @@ button:disabled {
         max-height: calc(100vh - 40px);
     }
 }
+
+/* === STYLES POUR LA PAGE À PROPOS === */
+.about-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2em;
+}
+
+.about-section {
+    margin-bottom: 3em;
+    padding: 2em;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.about-section h2 {
+    color: #1e2a78;
+    margin-bottom: 1em;
+    font-size: 1.8em;
+    text-align: center;
+}
+
+.models-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2em;
+    margin-top: 2em;
+}
+
+.model-card {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2em;
+    border-radius: 15px;
+    border: 2px solid #4caf50;
+    transition: all 0.3s ease;
+}
+
+.model-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.model-card h3 {
+    color: #1e2a78;
+    margin-bottom: 1em;
+    font-size: 1.3em;
+}
+
+.model-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 1em 0;
+}
+
+.model-card li {
+    padding: 0.3em 0;
+    padding-left: 1.5em;
+    position: relative;
+}
+
+.model-card li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5em;
+    margin-top: 2em;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 1.5em;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card h3 {
+    color: #1e2a78;
+    margin-bottom: 0.5em;
+    font-size: 1.2em;
+}
+
+.process-steps {
+    list-style: none;
+    counter-reset: step-counter;
+    padding: 0;
+    margin-top: 2em;
+}
+
+.process-steps li {
+    counter-increment: step-counter;
+    padding: 1em 0;
+    padding-left: 3em;
+    position: relative;
+    border-left: 2px solid #4caf50;
+    margin-left: 1em;
+}
+
+.process-steps li:before {
+    content: counter(step-counter);
+    position: absolute;
+    left: -1em;
+    top: 0.8em;
+    background: #4caf50;
+    color: white;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5em;
+    margin-top: 2em;
+}
+
+.metric-card {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2em;
+    border-radius: 15px;
+    text-align: center;
+    border: 2px solid #667eea;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.metric-card h3 {
+    color: #1e2a78;
+    margin-bottom: 0.5em;
+    font-size: 1.1em;
+}
+
+.metric-value {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #4caf50;
+    margin: 0.2em 0;
+}
+
+.metric-label {
+    color: #666;
+    font-size: 0.9em;
+    margin: 0;
+}
+
+.tech-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2em;
+    margin-top: 2em;
+}
+
+.tech-info h3 {
+    color: #1e2a78;
+    margin-bottom: 1em;
+    font-size: 1.3em;
+}
+
+.tech-info ul {
+    list-style: none;
+    padding: 0;
+}
+
+.tech-info li {
+    padding: 0.5em 0;
+    padding-left: 1.5em;
+    position: relative;
+}
+
+.tech-info li:before {
+    content: "⚡";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+}
+
+.improvements-timeline {
+    margin-top: 2em;
+}
+
+.improvement-item {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 1.5em;
+    margin-bottom: 1.5em;
+    border-radius: 10px;
+    border-left: 4px solid #4caf50;
+}
+
+.improvement-item h3 {
+    color: #1e2a78;
+    margin-bottom: 0.5em;
+}
+
+.improvement-item ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 0.5em;
+}
+
+.improvement-item li {
+    padding: 0.2em 0;
+    padding-left: 1.5em;
+    position: relative;
+}
+
+.improvement-item li:before {
+    content: "🚀";
+    position: absolute;
+    left: 0;
+}
+
+.about-footer {
+    text-align: center;
+    margin-top: 3em;
+    padding-top: 2em;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1em 2em;
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    transition: all 0.3s ease;
+    margin-bottom: 1em;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* === STYLES POUR ÉQUIPE & REMERCIEMENTS === */
+.team-section {
+    margin-bottom: 2em;
+}
+
+.team-section h3 {
+    color: #1e2a78;
+    margin-bottom: 1em;
+    font-size: 1.4em;
+    text-align: left;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5em;
+    margin-top: 1.5em;
+}
+
+.team-member {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1.5em;
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.team-member:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.team-member h4 {
+    color: #1e2a78;
+    margin-bottom: 0.8em;
+    font-size: 1.2em;
+    border-bottom: 2px solid #4caf50;
+    padding-bottom: 0.3em;
+}
+
+.team-member p {
+    margin: 0.5em 0;
+    line-height: 1.5;
+}
+
+.team-member a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.team-member a:hover {
+    color: #1e2a78;
+    text-decoration: underline;
+}
+
+.acknowledgments-section {
+    margin-top: 2em;
+}
+
+.acknowledgments-section h3 {
+    color: #1e2a78;
+    margin-bottom: 1em;
+    font-size: 1.4em;
+    text-align: left;
+}
+
+.acknowledgment-card {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
+    padding: 2em;
+    border-radius: 15px;
+    border: 2px solid #4caf50;
+    margin-top: 1.5em;
+    position: relative;
+    overflow: hidden;
+}
+
+.acknowledgment-card::before {
+    content: "🌟";
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 3em;
+    opacity: 0.1;
+    transform: rotate(15deg);
+}
+
+.acknowledgment-card h4 {
+    color: #1e2a78;
+    margin-bottom: 1em;
+    font-size: 1.3em;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 0.5em;
+    border-radius: 8px;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.acknowledgment-card p {
+    margin: 0.8em 0;
+    line-height: 1.6;
+}
+
+.acknowledgment-card em {
+    color: #4caf50;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.acknowledgment-card a {
+    color: #25D366;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 0.2em 0.5em;
+    background: rgba(37, 211, 102, 0.1);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.acknowledgment-card a:hover {
+    background: rgba(37, 211, 102, 0.2);
+    transform: scale(1.05);
+}
+
+/* Responsive pour équipe & remerciements */
+@media (max-width: 768px) {
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .acknowledgment-card {
+        padding: 1.5em;
+    }
+    
+    .acknowledgment-card h4 {
+        font-size: 1.1em;
+    }
+}
+
+/* === FIN STYLES ÉQUIPE & REMERCIEMENTS === */
+
+/* ...existing code... */

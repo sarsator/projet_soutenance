@@ -1,0 +1,31 @@
+{
+  "version": "1.1",
+  "timestamp": "2025-07-16T20:22:07.357244",
+  "model_type": "ml",
+  "deployed_at": "2025-07-16 20:22:07",
+  "deployment_id": "20250716_202207",
+  "algorithm": "CatBoost Classifier",
+  "features": [
+    "race_champignon",
+    "type_substrat",
+    "jours_inoculation",
+    "hygrometrie",
+    "co2_ppm"
+  ],
+  "training_samples": "1000+ échantillons",
+  "accuracy": "95%+",
+  "framework": "CatBoost",
+  "model_format": "Joblib",
+  "deployment_reason": "Version update with enhanced feature engineering",
+  "performance_improvements": [
+    "Better handling of categorical features",
+    "Improved contamination prediction accuracy",
+    "Enhanced integration with vision model"
+  ],
+  "version_notes": "Production deployment with optimized parameters",
+  "model_file": "model_catboost_best.joblib",
+  "model_size_bytes": 649104,
+  "model_size_mb": 0.62,
+  "source_path": "/home/sarsator/projets/gaia_vision/api/models/ml_model/versions/v1.0_20250711_145216/model_catboost_best.joblib",
+  "deployed_path": "/home/sarsator/projets/gaia_vision/api/models/ml_model/versions/v1.1_20250716_202207/model_catboost_best.joblib"
+}

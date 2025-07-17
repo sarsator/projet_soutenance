@@ -39,45 +39,49 @@ class PredictionService:
             Dict avec les versions des modèles ML et DL
         """
         versions = {
-            "catboost": "v1.0",  # Version CatBoost par défaut
-            "vision": "Non disponible"
+            "catboost": "v1.0",  # Version par défaut
+            "vision": "v1.0"     # Version par défaut
         }
         
         try:
-            # Récupérer la version du modèle Vision directement depuis le modèle chargé
-            if self.vision_model and self.vision_model.is_loaded():
-                if hasattr(self.vision_model, 'metadata') and self.vision_model.metadata:
-                    # Si nous avons des métadonnées (SavedModel), utiliser la version
-                    version = self.vision_model.metadata.get('version', 'unknown')
-                    versions["vision"] = f"v{version}"
-                elif hasattr(self.vision_model, 'model_path'):
-                    # Extraire la version depuis le chemin du modèle
-                    model_path = str(self.vision_model.model_path)
-                    if 'v1.3_' in model_path:
-                        versions["vision"] = "v1.3"
-                    elif 'v1.2_' in model_path:
-                        versions["vision"] = "v1.2"
-                    else:
-                        versions["vision"] = "v1.0"
-                else:
-                    versions["vision"] = "v1.0"
-                    
-            # Fallback avec le gestionnaire de versions si disponible
-            if versions["vision"] == "Non disponible" and self.version_manager:
+            # Utiliser le gestionnaire de versions pour récupérer les versions actuelles
+            if self.version_manager:
+                # Récupérer la version CatBoost actuelle
                 try:
-                    dl_version = self.version_manager.get_latest_version("dl")
-                    if dl_version:
-                        versions["vision"] = f"v{dl_version['version']}"
+                    catboost_version = self.version_manager.obtenir_version_actuelle("ml_model")
+                    if catboost_version:
+                        versions["catboost"] = f"v{catboost_version}"
                 except Exception as e:
-                    logger.warning(f"Erreur lors de la récupération des versions via version_manager: {e}")
+                    logger.warning(f"Erreur récupération version CatBoost: {e}")
+                
+                # Récupérer la version Vision actuelle
+                try:
+                    vision_version = self.version_manager.obtenir_version_actuelle("dl_model")
+                    if vision_version:
+                        versions["vision"] = f"v{vision_version}"
+                except Exception as e:
+                    logger.warning(f"Erreur récupération version Vision: {e}")
+            
+            # Fallback : essayer d'extraire depuis le chemin du modèle vision
+            if versions["vision"] == "v1.0" and self.vision_model and self.vision_model.est_charge():
+                try:
+                    if hasattr(self.vision_model, 'model_path'):
+                        model_path = str(self.vision_model.model_path)
+                        # Extraire la version depuis le chemin (ex: v1.5_20250716_202917)
+                        import re
+                        version_match = re.search(r'v(\d+\.\d+)_', model_path)
+                        if version_match:
+                            versions["vision"] = f"v{version_match.group(1)}"
+                except Exception as e:
+                    logger.warning(f"Erreur extraction version depuis chemin: {e}")
                     
         except Exception as e:
             logger.warning(f"Erreur lors de la récupération des versions: {e}")
         
-        logger.info(f"Versions des modèles récupérées: {versions}")
+        logger.info(f"🏷️  Versions des modèles récupérées: {versions}")
         return versions
     
-    def load_models(self) -> bool:
+    def charger_modeles(self) -> bool:
         """
         Charge les deux modèles
         
@@ -87,8 +91,8 @@ class PredictionService:
         try:
             logger.info("Chargement des modèles...")
             
-            catboost_success = self.catboost_model.load_model()
-            vision_success = self.vision_model.load_model()
+            catboost_success = self.catboost_model.charger_modele()
+            vision_success = self.vision_model.charger_modele()
             
             self._models_loaded = catboost_success and vision_success
             
@@ -131,7 +135,7 @@ class PredictionService:
         
         if not self._models_loaded:
             logger.info("Modèles non chargés, tentative de chargement...")
-            if not self.load_models():
+            if not self.charger_modeles():
                 logger.error("❌ Impossible de charger les modèles")
                 raise RuntimeError("Impossible de charger les modèles")
             logger.info("✅ Modèles chargés avec succès")
@@ -297,13 +301,19 @@ class PredictionService:
         # Si Vision n'est pas confiant (<40%), on utilise CatBoost en backup AVEC PRUDENCE
         else:
             logger.warning(f"Vision peu confiant ({vision_confidence:.3f})")
+            
+            # NOUVEAU: Si Vision dit clairement "sain", même avec faible confiance, on le respecte
+            if vision_pred == "sain":
+                logger.info("Vision dit 'sain' même avec faible confiance -> respecter cette décision")
+                return "sain"
+            
             # NOUVEAU: Si CatBoost dit "risque élevé" mais Vision n'est pas sûr, 
             # on reste prudent et on dit "sain" sauf si vraiment critique
             if catboost_risk == "high":
                 # Vérifier la probabilité exacte de CatBoost
                 catboost_prob = max(catboost_result["probability"])
-                if catboost_prob > 0.9:  # CatBoost très sûr
-                    logger.info("CatBoost très confiant sur risque élevé, décision: contaminé")
+                if catboost_prob > 0.95:  # CatBoost TRÈS sûr (95%+)
+                    logger.info("CatBoost extrêmement confiant sur risque élevé, décision: contaminé")
                     return "contamine"
                 else:
                     logger.info("CatBoost moyennement confiant, Vision incertain -> sain par précaution")
@@ -361,7 +371,79 @@ class PredictionService:
             Dict avec l'état de chaque modèle
         """
         return {
-            "catboost_loaded": self.catboost_model.is_loaded(),
-            "vision_loaded": self.vision_model.is_loaded(),
+            "catboost_loaded": self.catboost_model.est_charge(),
+            "vision_loaded": self.vision_model.est_charge(),
             "all_models_ready": self._models_loaded
         }
+    
+    def recharger_modeles(self) -> bool:
+        """
+        Force le rechargement des modèles (utile après un changement de version)
+        
+        Returns:
+            bool: True si le rechargement a réussi
+        """
+        try:
+            logger.info("🔄 Rechargement forcé des modèles...")
+            
+            # Décharger les modèles actuels
+            self._models_loaded = False
+            
+            # Forcer le rechargement du modèle CatBoost
+            self.catboost_model._model = None
+            self.catboost_model._model_loaded = False
+            
+            # Forcer le rechargement du modèle Vision
+            self.vision_model._model = None
+            self.vision_model._model_loaded = False
+            
+            # Recharger les modèles
+            result = self.charger_modeles()
+            
+            if result:
+                logger.info("✅ Rechargement des modèles réussi")
+                # Afficher les nouvelles versions
+                versions = self.get_model_versions()
+                logger.info(f"🏷️  Nouvelles versions: {versions}")
+            else:
+                logger.error("❌ Échec du rechargement des modèles")
+                
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Erreur lors du rechargement des modèles: {e}")
+            return False
+
+    def check_models_version_sync(self) -> bool:
+        """
+        Vérifie si les modèles chargés correspondent aux versions actuelles
+        
+        Returns:
+            bool: True si synchronisé, False sinon
+        """
+        try:
+            if not self.version_manager:
+                return True  # Pas de vérification possible
+            
+            # Récupérer les versions actuelles du système
+            current_dl_version = self.version_manager.obtenir_version_actuelle("dl_model")
+            current_ml_version = self.version_manager.obtenir_version_actuelle("ml_model")
+            
+            # Récupérer les versions des modèles chargés
+            loaded_versions = self.get_model_versions()
+            
+            # Comparer
+            dl_sync = loaded_versions["vision"] == f"v{current_dl_version}"
+            ml_sync = loaded_versions["catboost"] == f"v{current_ml_version}"
+            
+            if not (dl_sync and ml_sync):
+                logger.warning(f"⚠️  Désynchronisation détectée:")
+                logger.warning(f"   Vision: chargé {loaded_versions['vision']}, actuel v{current_dl_version}")
+                logger.warning(f"   CatBoost: chargé {loaded_versions['catboost']}, actuel v{current_ml_version}")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.warning(f"Erreur lors de la vérification de synchronisation: {e}")
+            return True  # En cas d'erreur, on assume que c'est OK

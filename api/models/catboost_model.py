@@ -9,6 +9,7 @@ import joblib
 import pandas as pd
 from pathlib import Path
 from typing import Dict, Any, Optional, Union
+from config import config
 
 logger = logging.getLogger(__name__)
 
@@ -18,27 +19,17 @@ class CatBoostModel:
     """
     
     def __init__(self, model_path: Optional[str] = None):
-        """
-        Initialise le modèle CatBoost.
-        
-        Args:
-            model_path: Chemin vers le fichier du modèle (.joblib)
-        """
+      
         self.model_path = model_path
         self.model = None
         self._loaded = False
         
         # Charger automatiquement si un chemin est fourni
         if model_path:
-            self.load_model()
+            self.charger_modele()
     
-    def load_model(self) -> bool:
-        """
-        Charge le modèle CatBoost depuis le fichier.
-        
-        Returns:
-            bool: True si le chargement réussit, False sinon
-        """
+    def charger_modele(self) -> bool:
+      
         try:
             if not self.model_path:
                 # Utiliser le chemin par défaut
@@ -64,34 +55,15 @@ class CatBoostModel:
             self._loaded = False
             return False
     
-    def is_loaded(self) -> bool:
-        """
-        Vérifie si le modèle est chargé.
-        
-        Returns:
-            bool: True si le modèle est chargé
-        """
+    def est_charge(self) -> bool:     
         return self._loaded and self.model is not None
     
     def predict(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Effectue une prédiction avec le modèle CatBoost.
-        
-        Args:
-            input_data: Dictionnaire avec les features d'entrée
-                       - race_champignon: str
-                       - type_substrat: str
-                       - jours_inoculation: int
-                       - hygrometrie: float
-                       - co2_ppm: float
-        
-        Returns:
-            Dict contenant la prédiction et la confiance
-        """
+    
         logger.info("=== DÉBUT PRÉDICTION CATBOOST ===")
         logger.info(f"Données d'entrée reçues: {input_data}")
         
-        if not self.is_loaded():
+        if not self.est_charge():
             logger.error("❌ Modèle CatBoost non chargé")
             return {
                 "prediction": 0,
@@ -104,12 +76,12 @@ class CatBoostModel:
         try:
             # Préparer les données d'entrée
             logger.info("Préparation des données d'entrée...")
-            df_input = self._prepare_input_data(input_data)
+            df_input = self._preparer_donnees_entree(input_data)
             logger.info(f"DataFrame préparé: {df_input}")
             logger.info(f"Colonnes du DataFrame: {df_input.columns.tolist()}")
             logger.info(f"Types des données: {df_input.dtypes.to_dict()}")
             
-            # Prédiction
+            # Prédiction et confiance
             logger.info("Exécution de la prédiction...")
             prediction = self.model.predict(df_input)[0]
             logger.info(f"Prédiction brute: {prediction}")
@@ -117,15 +89,16 @@ class CatBoostModel:
             probabilities = self.model.predict_proba(df_input)[0]
             logger.info(f"Probabilités brutes: {probabilities}")
             
-            # Calculer la confiance (probabilité de la classe prédite)
+            # Calculer la confiance 
             confidence = float(max(probabilities))
             logger.info(f"Confiance calculée: {confidence}")
             
             # Déterminer le niveau de risque basé sur la prédiction
-            # Version très permissive : si la probabilité de la classe 1 ("à analyser") > 0.10, c'est un risque élevé
-            # Même si la prédiction finale est 0, on regarde quand même la probabilité de contamination
+            # Version pour les test qui laisse presque tout passer 
+            # si la probabilité de la classe 1 ("à analyser") > 0.10, c'est un risque élevé
+            valeur_de_risque = config.valeur_min_catboost
             probability_class_1 = float(probabilities[1]) if len(probabilities) > 1 else float(probabilities[0])
-            risk_level = "high" if probability_class_1 > 0.10 else "low"
+            risk_level = "high" if probability_class_1 > valeur_de_risque else "low"
             logger.info(f"Niveau de risque: {risk_level} (seuil: 0.10, prob_classe_1: {probability_class_1:.3f})")
             
             result = {
@@ -156,7 +129,7 @@ class CatBoostModel:
                 "error": str(e)
             }
     
-    def _prepare_input_data(self, input_data: Dict[str, Any]) -> pd.DataFrame:
+    def _preparer_donnees_entree(self, input_data: Dict[str, Any]) -> pd.DataFrame:
         """
         Prépare les données d'entrée pour la prédiction.
         
@@ -177,14 +150,14 @@ class CatBoostModel:
         
         return pd.DataFrame([data])
     
-    def get_model_info(self) -> Dict[str, Any]:
+    def obtenir_infos_modele(self) -> Dict[str, Any]:
         """
         Retourne les informations sur le modèle.
         
         Returns:
             Dict avec les informations du modèle
         """
-        if not self.is_loaded():
+        if not self.est_charge():
             return {"loaded": False, "error": "Modèle non chargé"}
         
         try:

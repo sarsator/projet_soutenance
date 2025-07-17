@@ -2,19 +2,104 @@
 
 ## 📋 Nouvelles Fonctionnalités
 
-### 1. 🤖 Indication d'Analyse par Intelligence Artificielle
+### 1.  Indication d'Analyse par Intelligence Artificielle
 - Le titre de l'analyse indique maintenant clairement que l'analyse est effectuée par "Intelligence Artificielle"
 - Remplace l'ancien titre générique "Résultat de l'Analyse"
 
 ### 2. 📊 Affichage Intelligent du Score de Confiance
 - **Si seul CatBoost est utilisé** : Affiche "Niveau de confiance (Modèle CatBoost)" avec le score CatBoost
-- **Si Vision est utilisé** : Affiche "Niveau de confiance (Modèle Vision)" avec le score Vision uniquement
+- **Si SSD Vision est utilisé** : Affiche "Niveau de confiance (Modèle SSD Vision)" avec le score SSD uniquement
 - Plus de confusion sur la source de la confiance !
 
-### 3. 🛍️ Comptage des Sacs (Vision)
-- Quand le modèle Vision est activé, affiche le nombre de sacs détectés dans l'image
-- Nouvelle section "Analyse des sacs" avec un indicateur visuel vert
-- Affichage du nombre avec une précision d'une décimale
+### 3. 🔍 Détection d'Objets (SSD Vision)
+- Quand le modèle SSD Vision est activé, affiche les informations de détection d'objets
+- Nouvelle section "Analyse de détection" avec détails sur les objets détectés
+- Affichage du nombre total de détections et répartition contaminé/sain
+
+### 4. 📖 Page "À propos"
+- Nouveau lien "À propos" dans la navigation
+- Page dédiée expliquant les fonctionnalités et améliorations
+- Informations sur les modèles utilisés et leurs performances
+- Accessible via `/about` avec design moderne et responsive
+
+🔍 Analyse de détection
+Détections totales: 12
+✅ Objets sains: 8
+⚠️ Objets contaminés: 4
+
+Méthodes utilisées: [catboost, ssd_vision]
+```
+
+### Page "À propos"
+- Interface accessible via http://localhost:5000/about
+- Présentation complète des modèles et fonctionnalités
+- Métriques réelles basées sur les performances TensorBoard
+- Design moderne et responsiveyse indique maintenant clairement que l'analyse est effectuée par "Intelligence Artificielle"
+- Remplace l'ancien titre générique "Résultat de l'Analyse"
+
+### 2. 📊 Affichage Intelligent du Score de Confiance
+- **Si seul CatBoost est utilisé** : Affiche "Niveau de confiance (Modèle CatBoost)" avec le score CatBoost
+- **Si SSD Vision est utilisé** : Affiche "Niveau de confiance (Modèle SSD Vision)" avec le score SSD uniquement
+- Plus de confusion sur la source de la confiance !
+
+### 3. 🔍 Détection d'Objets (SSD Vision)
+- Quand le modèle SSD Vision est activé, affiche les informations de détection d'objets
+- Nouvelle section "Analyse de détection" avec détails sur les objets détectés
+- Affichage du nombre total de détections et répartition contaminé/sain
+
+### 4. 📖 Page "À propos"
+- Nouveau lien "À propos" dans la navigation
+- Page dédiée expliquant les fonctionnalités et améliorations
+- Informations sur les modèles utilisés et leurs performances
+- Accessible via `/about` avec design moderne et responsive
+```
+🤖 Résultat de l'Analyse par Intelligence Artificielle
+
+Niveau de confiance (Modèle SSD Vision): 58.3%
+
+🔍 Analyse de détection
+Détections totales: 12
+✅ Objets sains: 8
+⚠️ Objets contaminés: 4
+
+Méthodes utilisées: [catboost, ssd_vision]
+```ue élevé)
+```
+🤖 Résultat de l'Analyse par Intelligence Artificielle
+
+Niveau de confiance (Modèle SSD Vision): 58.3%
+
+🔍 Analyse de détection
+Détections totales: 12
+✅ Objets sains: 8
+⚠️ Objets contaminés: 4
+
+Méthodes utilisées: [catboost, ssd_vision]
+```ue élevé)
+```
+🤖 Résultat de l'Analyse par Intelligence Artificielle
+
+Niveau de confiance (Modèle SSD Vision): 44.3%
+
+🔍 Analyse de détection
+Détections totales: 12
+✅ Objets sains: 8
+⚠️ Objets contaminés: 4
+
+Méthodes utilisées: [catboost, ssd_vision]
+```on d'Analyse par Intelligence Artificielle
+- Le titre de l'analyse indique maintenant clairement que l'analyse est effectuée par "Intelligence Artificielle"
+- Remplace l'ancien titre générique "Résultat de l'Analyse"
+
+### 2. 📊 Affichage Intelligent du Score de Confiance
+- **Si seul CatBoost est utilisé** : Affiche "Niveau de confiance (Modèle CatBoost)" avec le score CatBoost
+- **Si SSD Vision est utilisé** : Affiche "Niveau de confiance (Modèle SSD Vision)" avec le score SSD uniquement
+- Plus de confusion sur la source de la confiance !
+
+### 3. � Détection d'Objets (SSD Vision)
+- Quand le modèle SSD Vision est activé, affiche les informations de détection d'objets
+- Nouvelle section "Analyse de détection" avec détails sur les objets détectés
+- Affichage du nombre total de détections et répartition contaminé/sain
 
 ## 🔧 Modifications Techniques
 
@@ -22,37 +107,49 @@
 ```python
 # Nouvelles informations ajoutées à la réponse
 {
-    "confidence_source": "catboost" | "vision",  # Source de la confiance
-    "multi_sac_count": float | None,             # Nombre de sacs détectés
+    "confidence_source": "catboost" | "ssd_vision",  # Source de la confiance
+    "detection_summary": {                            # Résumé des détections SSD
+        "total_detections": int,
+        "contaminated_count": int,
+        "healthy_count": int
+    },
     "analysis_method": "Intelligence Artificielle"
 }
 ```
 
 ### API (`main.py`)
 - Transmission des nouvelles informations vers le frontend
-- Support de `confidence_source`, `multi_sac_count`, et `analysis_method`
+- Support de `confidence_source`, `detection_summary`, et `analysis_method`
 
 ### Frontend (`templates/index.html`)
 - Titre modifié pour indiquer "Intelligence Artificielle"
 - Affichage conditionnel de la source de confiance
-- Nouvelle section pour le comptage des sacs
+- Nouvelle section pour les détections d'objets
+- Lien "À propos" ajouté dans la navigation
 - Styles visuels améliorés
 
+### Frontend (`templates/about.html`)
+- Nouvelle page dédiée aux informations système
+- Présentation des modèles CatBoost et SSD Vision
+- Explication des fonctionnalités et améliorations
+- Design cohérent avec l'interface principale
+
 ### Styles (`static/front.css`)
-- Nouveaux styles pour la section comptage de sacs
-- Indicateur visuel vert pour le nombre de sacs
+- Nouveaux styles pour la section détections d'objets
+- Styles complets pour la page "À propos"
+- Indicateurs visuels pour objets détectés
 - Amélioration de la lisibilité
 
 ## 📝 Logique d'Affichage
 
 ### Score de Confiance
 1. **CatBoost uniquement** → Affiche confiance CatBoost
-2. **Vision utilisé** → Affiche confiance Vision (prioritaire car analyse l'image réelle)
+2. **SSD Vision utilisé** → Affiche confiance SSD Vision (prioritaire car analyse l'image réelle)
 
-### Nombre de Sacs
-- **Affiché uniquement** si le modèle Vision est utilisé
-- **Format** : nombre avec 1 décimale (ex: "2.3 sacs")
-- **Style** : badge vert avec icône 🛍️
+### Détections d'Objets
+- **Affiché uniquement** si le modèle SSD Vision est utilisé
+- **Format** : nombre total de détections + répartition contaminé/sain
+- **Style** : badges colorés avec icônes � ✅ ⚠️
 
 ## 🧪 Tests
 
@@ -78,7 +175,8 @@ cd frontend && python app.py
 3. Vérifier :
    - ✅ Titre "Analyse par Intelligence Artificielle"
    - ✅ Source de confiance affichée
-   - ✅ Nombre de sacs (si Vision utilisé)
+   - ✅ Détections d'objets (si SSD Vision utilisé)
+   - ✅ Page "À propos" accessible via le lien navigation
 
 ## 🎯 Résultats Attendus
 
@@ -90,28 +188,33 @@ Niveau de confiance (Modèle CatBoost): 85.2%
 Méthodes utilisées: [catboost]
 ```
 
-### Avec Vision (risque élevé)
+### Avec SSD Vision (risque élevé)
 ```
 🤖 Résultat de l'Analyse par Intelligence Artificielle
 
-Niveau de confiance (Modèle Vision): 92.7%
+Niveau de confiance (Modèle SSD Vision): 92.7%
 
-🛍️ Analyse des sacs
-Nombre de sacs détectés: 2.3
+� Analyse de détection
+Détections totales: 12
+✅ Objets sains: 8
+⚠️ Objets contaminés: 4
 
-Méthodes utilisées: [catboost, vision]
+Méthodes utilisées: [catboost, ssd_vision]
 ```
 
 ## 🚀 Impact Utilisateur
 
 1. **Clarté** : L'utilisateur sait immédiatement que c'est de l'IA
 2. **Transparence** : Source de confiance clairement identifiée  
-3. **Information** : Nombre de sacs visible quand pertinent
-4. **Professionnalisme** : Interface plus informative et précise
+3. **Information** : Détections d'objets visibles quand pertinent
+4. **Documentation** : Page "À propos" pour comprendre le système
+5. **Professionnalisme** : Interface plus informative et précise
 
 ## 📦 Fichiers Modifiés
 
 - `api/main.py` - API enrichie avec nouvelles données
-- `frontend/templates/index.html` - Interface utilisateur mise à jour
+- `frontend/app.py` - Route `/about` ajoutée
+- `frontend/templates/index.html` - Interface utilisateur mise à jour + lien "À propos"
+- `frontend/templates/about.html` - Nouvelle page d'informations système
 - `frontend/static/front.css` - Styles pour nouvelles fonctionnalités
 - `start_test_services.py` - Script de démarrage rapide

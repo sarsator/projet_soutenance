@@ -1,0 +1,16 @@
+{
+  "version": "1.2",
+  "timestamp": "2025-07-16T20:25:22.921127",
+  "model_type": "ml",
+  "deployed_at": "2025-07-16 20:25:22",
+  "deployment_id": "20250716_202522",
+  "algorithm": "CatBoost Classifier",
+  "version_fix": "Correction incrémentation version",
+  "test_deployment": true,
+  "model_file": "model_catboost_best.joblib",
+  "model_size_bytes": 649104,
+  "model_size_mb": 0.62,
+  "source_path": "/home/sarsator/projets/gaia_vision/api/models/ml_model/versions/v1.1_20250716_202207/model_catboost_best.joblib",
+  "deployed_path": "/home/sarsator/projets/gaia_vision/api/models/ml_model/versions/v1.2_20250716_202522/model_catboost_best.joblib",
+  "model_format": "Joblib"
+}

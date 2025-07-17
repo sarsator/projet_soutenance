@@ -15,42 +15,36 @@ class ModelVersionManager:
     """Gestionnaire de versions pour les modèles"""
     
     def __init__(self, base_models_dir: Union[str, Path]):
-        """
-        Initialise le gestionnaire de versions
-        
-        Args:
-            base_models_dir: Dossier racine des modèles (api/models/)
-        """
+      
         self.base_dir = Path(base_models_dir)
         self.ml_model_dir = self.base_dir / "ml_model"
         self.dl_model_dir = self.base_dir / "dl_model"
         
         # Créer la structure de dossiers
-        self._ensure_directory_structure()
+        self._assurer_structure_dossiers()
     
-    def _ensure_directory_structure(self):
-        """Crée la structure de dossiers nécessaire"""
+    def _assurer_structure_dossiers(self):
+        """Assure que la structure des dossiers existe"""
         for model_dir in [self.ml_model_dir, self.dl_model_dir]:
             model_dir.mkdir(parents=True, exist_ok=True)
             (model_dir / "versions").mkdir(exist_ok=True)
     
-    def _generate_version_info(self, model_type: str, metadata: Dict = None) -> Dict:
-        """
-        Génère les informations de version
-        
-        Args:
-            model_type: Type de modèle ('ml' ou 'dl')
-            metadata: Métadonnées additionnelles
-            
-        Returns:
-            Dictionnaire avec les infos de version
-        """
+    def _generer_infos_version(self, model_type: str, metadata: Dict = None) -> Dict:
+        """Génère les informations de version pour un nouveau modèle"""
         timestamp = datetime.now()
         
-        # Obtenir la prochaine version
-        current_version = self.get_latest_version(model_type)
-        if current_version:
-            major, minor = current_version['version'].split('.')
+        # Obtenir la prochaine version en regardant TOUTES les versions existantes
+        all_versions = self.lister_versions(model_type)
+        if all_versions:
+            # Trouver la version la plus élevée
+            max_version = "0.0"
+            for version_info in all_versions:
+                current_ver = version_info['version']
+                if self._comparer_versions(current_ver, max_version) > 0:
+                    max_version = current_ver
+            
+            # Incrémenter la version
+            major, minor = max_version.split('.')
             next_version = f"{major}.{int(minor) + 1}"
         else:
             next_version = "1.0"
@@ -69,10 +63,7 @@ class ModelVersionManager:
         
         return version_info
     
-    def deploy_model(self, 
-                    source_path: Union[str, Path], 
-                    model_type: str,
-                    metadata: Dict = None) -> Dict:
+    def deployer_modele(self, source_path: Union[str, Path], model_type: str, metadata: Dict = None) -> Dict:
         """
         Déploie un nouveau modèle avec versioning
         
@@ -90,7 +81,7 @@ class ModelVersionManager:
                 raise FileNotFoundError(f"Modèle source non trouvé : {source_path}")
             
             # Générer les infos de version
-            version_info = self._generate_version_info(model_type, metadata)
+            version_info = self._generer_infos_version(model_type, metadata)
             version_id = f"v{version_info['version']}_{version_info['deployment_id']}"
             
             # Définir les chemins
@@ -99,7 +90,11 @@ class ModelVersionManager:
                 filename = "model_catboost_best.joblib"
             elif model_type == "dl":
                 model_dir = self.dl_model_dir
-                filename = "final_model.keras"
+                # Pour les modèles SSD SavedModel, on copie tout le dossier
+                if source_path.is_dir() and (source_path / "saved_model.pb").exists():
+                    filename = "saved_model"  # Dossier SavedModel
+                else:
+                    filename = "final_model.keras"  # Ancien format Keras
             else:
                 raise ValueError(f"Type de modèle invalide : {model_type}")
             
@@ -109,14 +104,25 @@ class ModelVersionManager:
             
             # Copier le modèle vers le dossier de version
             dest_model_path = version_dir / filename
-            shutil.copy2(source_path, dest_model_path)
+            
+            if model_type == "dl" and source_path.is_dir() and (source_path / "saved_model.pb").exists():
+                # Copier tout le dossier SavedModel
+                if dest_model_path.exists():
+                    shutil.rmtree(dest_model_path)
+                shutil.copytree(source_path, dest_model_path)
+                model_size = sum(f.stat().st_size for f in dest_model_path.rglob('*') if f.is_file())
+            else:
+                # Copier un fichier unique
+                shutil.copy2(source_path, dest_model_path)
+                model_size = dest_model_path.stat().st_size
             
             # Ajouter les infos sur le fichier
             version_info["model_file"] = filename
-            version_info["model_size_bytes"] = dest_model_path.stat().st_size
-            version_info["model_size_mb"] = round(version_info["model_size_bytes"] / (1024 * 1024), 2)
+            version_info["model_size_bytes"] = model_size
+            version_info["model_size_mb"] = round(model_size / (1024 * 1024), 2)
             version_info["source_path"] = str(source_path)
             version_info["deployed_path"] = str(dest_model_path)
+            version_info["model_format"] = "SavedModel" if filename == "saved_model" else "Keras" if filename.endswith(".keras") else "Joblib"
             
             # Sauvegarder les métadonnées
             metadata_path = version_dir / "metadata.json"
@@ -132,7 +138,7 @@ class ModelVersionManager:
             current_link.symlink_to(dest_model_path.relative_to(model_dir))
             
             # Mettre à jour l'historique des déploiements
-            self._update_deployment_history(model_type, version_info)
+            self._mettre_a_jour_historique_deploiement(model_type, version_info)
             
             logger.info(f"Modèle {model_type} déployé avec succès : version {version_info['version']}")
             
@@ -150,7 +156,7 @@ class ModelVersionManager:
                 "error": str(e)
             }
     
-    def _update_deployment_history(self, model_type: str, version_info: Dict):
+    def _mettre_a_jour_historique_deploiement(self, model_type: str, version_info: Dict):
         """Met à jour l'historique des déploiements"""
         if model_type == "ml":
             history_file = self.ml_model_dir / "deployment_history.json"
@@ -176,7 +182,7 @@ class ModelVersionManager:
         with open(history_file, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=2, ensure_ascii=False)
     
-    def get_deployment_history(self, model_type: str) -> List[Dict]:
+    def obtenir_historique_deploiement(self, model_type: str) -> List[Dict]:
         """Récupère l'historique des déploiements"""
         if model_type == "ml":
             history_file = self.ml_model_dir / "deployment_history.json"
@@ -192,12 +198,12 @@ class ModelVersionManager:
         except Exception:
             return []
     
-    def get_latest_version(self, model_type: str) -> Optional[Dict]:
+    def obtenir_derniere_version(self, model_type: str) -> Optional[Dict]:
         """Récupère les infos de la dernière version"""
-        history = self.get_deployment_history(model_type)
+        history = self.obtenir_historique_deploiement(model_type)
         return history[-1] if history else None
     
-    def list_versions(self, model_type: str) -> List[Dict]:
+    def lister_versions(self, model_type: str) -> List[Dict]:
         """Liste toutes les versions disponibles"""
         if model_type == "ml":
             versions_dir = self.ml_model_dir / "versions"
@@ -221,7 +227,7 @@ class ModelVersionManager:
         
         return versions
     
-    def rollback_to_version(self, model_type: str, version_id: str) -> Dict:
+    def rollback_vers_version(self, model_type: str, version_id: str) -> Dict:
         """
         Effectue un rollback vers une version spécifique
         
@@ -238,7 +244,12 @@ class ModelVersionManager:
                 filename = "model_catboost_best.joblib"
             else:
                 model_dir = self.dl_model_dir
-                filename = "final_model.keras"
+                # Chercher le bon type de fichier dans la version
+                version_dir = model_dir / "versions" / version_id
+                if (version_dir / "saved_model").exists():
+                    filename = "saved_model"
+                else:
+                    filename = "final_model.keras"
             
             version_dir = model_dir / "versions" / version_id
             if not version_dir.exists():
@@ -270,7 +281,7 @@ class ModelVersionManager:
                 "error": str(e)
             }
     
-    def get_current_model_path(self, model_type: str) -> Optional[Path]:
+    def obtenir_chemin_modele_actuel(self, model_type: str) -> Optional[Path]:
         """Récupère le chemin du modèle actuellement déployé"""
         if model_type == "ml":
             current_link = self.ml_model_dir / "current"
@@ -282,7 +293,7 @@ class ModelVersionManager:
         
         return None
     
-    def get_current_version(self, model_type: str) -> Optional[str]:
+    def obtenir_version_actuelle(self, model_type: str) -> Optional[str]:
         """
         Récupère la version actuellement déployée
         
@@ -301,9 +312,19 @@ class ModelVersionManager:
         
         if current_link.exists() and current_link.is_symlink():
             try:
-                # Le lien pointe vers le fichier du modèle dans versions/vX.Y_timestamp/
+                # Le lien pointe vers le fichier/dossier du modèle dans versions/vX.Y_timestamp/
                 target = current_link.resolve()
-                version_dir = target.parent
+                
+                # Remonter au dossier de version
+                if target.name == "saved_model" and target.is_dir():
+                    # Pour SavedModel, le dossier parent est la version
+                    version_dir = target.parent
+                elif target.suffix in [".keras", ".joblib"]:
+                    # Pour les fichiers simples, le dossier parent est la version
+                    version_dir = target.parent
+                else:
+                    # Essayer de trouver le dossier de version
+                    version_dir = target.parent if target.is_file() else target
                 
                 # Extraire la version du nom du dossier
                 version_dir_name = version_dir.name
@@ -316,7 +337,7 @@ class ModelVersionManager:
         
         return None
 
-    def cleanup_old_versions(self, model_type: str, keep_count: int = 5):
+    def nettoyer_anciennes_versions(self, model_type: str, keep_count: int = 5):
         """
         Nettoie les anciennes versions (garde seulement les N plus récentes)
         
@@ -324,7 +345,7 @@ class ModelVersionManager:
             model_type: Type de modèle
             keep_count: Nombre de versions à garder
         """
-        versions = self.list_versions(model_type)
+        versions = self.lister_versions(model_type)
         if len(versions) <= keep_count:
             return
         
@@ -347,3 +368,29 @@ class ModelVersionManager:
                     logger.info(f"Version {version_id} supprimée")
                 except Exception as e:
                     logger.error(f"Erreur lors de la suppression de {version_id} : {e}")
+    
+    def _comparer_versions(self, version1: str, version2: str) -> int:
+        """
+        Compare deux versions
+        
+        Returns:
+            1 si version1 > version2
+            0 si version1 == version2
+            -1 si version1 < version2
+        """
+        v1_parts = [int(x) for x in version1.split('.')]
+        v2_parts = [int(x) for x in version2.split('.')]
+        
+        # Égaliser les longueurs
+        while len(v1_parts) < len(v2_parts):
+            v1_parts.append(0)
+        while len(v2_parts) < len(v1_parts):
+            v2_parts.append(0)
+        
+        for i in range(len(v1_parts)):
+            if v1_parts[i] > v2_parts[i]:
+                return 1
+            elif v1_parts[i] < v2_parts[i]:
+                return -1
+        
+        return 0
