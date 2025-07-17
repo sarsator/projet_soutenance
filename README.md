@@ -51,7 +51,7 @@ gaia_vision/
 - 📱 **Design responsive** mobile-friendly
 
 **DevOps :**
-- 🐍 **Python 3.8+** 
+- 🐍 **Python 3.10+** 
 - 📝 **Jupyter** pour le développement iteratif
 - 🔧 **Git** pour le versioning du code
 - 📋 **Requirements.txt** pour la reproductibilité

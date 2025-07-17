@@ -126,14 +126,14 @@
         </div>
         
         <div class="detection-controls" style="margin-top: 10px;">
-            {% if response.vision_prediction and response.vision_prediction.detections %}
+            {% if response.details and response.details.vision_prediction and response.details.vision_prediction.detections %}
             <button type="button" class="toggle-detections" onclick="toggleDetections()">
                 🎯 Afficher les détections
             </button>
             
-            {% set contaminated_count = response.vision_prediction.detection_summary.contaminated_count %}
+            {% set contaminated_count = response.details.vision_prediction.detection_summary.contaminated_count %}
             <span class="detection-info" style="margin-left: 15px; font-size: 0.9em; color: #666;">
-                {{ response.vision_prediction.detection_summary.total_detections }} détection(s) trouvée(s)
+                {{ response.details.vision_prediction.detection_summary.total_detections }} détection(s) trouvée(s)
                 {% if contaminated_count > 0 %}
                 - {{ contaminated_count }} contamination(s)
                 {% endif %}
@@ -141,25 +141,14 @@
             
             <!-- Boutons heatmap seulement si contamination détectée -->
             <!-- DEBUG: Affichage toujours pour tester -->
-            <button type="button" class="heatmap-button" onclick="generateHeatmap()" style="margin-left: 10px;">
+            <!-- <button type="button" class="heatmap-button" onclick="generateHeatmap()" style="margin-left: 10px;">
                 🔥 Heatmap contamination
             </button>
             <button type="button" class="overlay-button" onclick="generateOverlay()" style="margin-left: 10px;">
                 🎯 Overlay contamination
-            </button>
+            </button> -->
             
-            <!-- Condition d'origine (désactivée pour debug) -->
-            <!--
-            {% set contaminated_detections = response.vision_prediction.detections | selectattr('class_name', 'equalto', 'contaminated') | list %}
-            {% if contaminated_detections | length > 0 %}
-            <button type="button" class="heatmap-button" onclick="generateHeatmap()" style="margin-left: 10px;">
-                🔥 Heatmap contamination
-            </button>
-            <button type="button" class="overlay-button" onclick="generateOverlay()" style="margin-left: 10px;">
-                🎯 Overlay contamination
-            </button>
-            {% endif %}
-            -->
+        
         </div>
     </div>
     {% endif %}
@@ -167,13 +156,14 @@
     
     <!-- Zone heatmap de contamination -->
     {% if response.prediction == "contamine" or response.prediction == 1 %}
-    <div class="heatmap-zone" style="margin-top: 20px; padding: 20px; border-radius: 12px; background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border: 2px solid #fc8181; box-shadow: 0 4px 12px rgba(252, 129, 129, 0.2);">
+    <div class="heatmap-zone" style="margin-top: 20px; margin-bottom: 30px; padding: 20px; border-radius: 12px; background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border: 2px solid #fc8181; box-shadow: 0 4px 12px rgba(252, 129, 129, 0.2);">
         <div style="display: flex; align-items: center; margin-bottom: 15px;">
             <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #ff6b6b, #ee5a52); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; animation: pulse 2s infinite;">
                 🔥
             </div>
             <div>
                 <h4 style="margin: 0; color: #c53030; font-size: 1.2em; font-weight: bold;">Analyse Thermique de Contamination</h4>
+                <br>
                 <p style="margin: 2px 0 0 0; color: #9c4221; font-size: 0.9em;">Visualisation des zones de contamination détectées</p>
             </div>
         </div>
@@ -315,12 +305,14 @@
 
 <!-- Initialisation des données de détection -->
 <script>
-{% if response and response.vision_prediction and response.vision_prediction.detections %}
+{% if response and response.details and response.details.vision_prediction and response.details.vision_prediction.detections %}
 window.detectionData = {
-    detections: {{ response.vision_prediction.detections | tojson | safe }}
+    detections: {{ response.details.vision_prediction.detections | tojson | safe }}
 };
+console.log('🔧 Données de détection initialisées:', window.detectionData);
 {% else %}
 window.detectionData = null;
+console.log('🔧 Aucune donnée de détection trouvée dans la réponse');
 {% endif %}
 </script>
 
@@ -718,6 +710,31 @@ Détails: Consultez la console (F12) pour plus d'informations.`;
             return;
         }
         
+        // Vérification améliorée des données de détection
+        console.log('🔧 Vérification des données de détection:', window.detectionData);
+        
+        if (!window.detectionData || !window.detectionData.detections || !Array.isArray(window.detectionData.detections)) {
+            console.error('❌ Données de détection non trouvées ou invalides');
+            console.error('window.detectionData:', window.detectionData);
+            
+            // Proposer un fallback : faire une nouvelle prédiction via l'API
+            const shouldRetry = confirm('❌ Données de détection non trouvées.\n\nVoulez-vous que je refasse une prédiction pour générer la heatmap ?');
+            if (shouldRetry) {
+                // Fallback : utiliser l'ancien système qui refait une prédiction
+                generateHeatmapWithPrediction();
+            }
+            return;
+        }
+        
+        // Vérifier qu'il y a des détections
+        if (window.detectionData.detections.length === 0) {
+            console.warn('⚠️ Aucune détection trouvée');
+            alert('⚠️ Aucune détection trouvée dans l\'image analysée.');
+            return;
+        }
+        
+        console.log(`🔧 ${window.detectionData.detections.length} détection(s) trouvée(s)`);
+        
         // Afficher l'indicateur de chargement
         showHeatmapLoading('heatmap');
         
@@ -730,6 +747,10 @@ Détails: Consultez la console (F12) pour plus d'informations.`;
             .then(blob => {
                 const formData = new FormData();
                 formData.append('file', blob, 'image.jpg');
+                
+                // IMPORTANT: Envoyer les données de détection avec l'image
+                // pour garantir la cohérence des résultats
+                formData.append('detections', JSON.stringify(window.detectionData.detections));
                 
                 // Utiliser l'endpoint Flask local au lieu de l'API FastAPI
                 return fetch('/heatmap', {
@@ -760,6 +781,51 @@ Détails: Consultez la console (F12) pour plus d'informations.`;
             });
     };
     
+    // Fonction fallback pour générer heatmap avec prédiction
+    function generateHeatmapWithPrediction() {
+        console.log('🔥 Génération heatmap avec prédiction (fallback)...');
+        
+        const imageElement = document.getElementById('analysisImage');
+        if (!imageElement) {
+            alert('❌ Image d\'analyse non trouvée.');
+            return;
+        }
+        
+        showHeatmapLoading('heatmap');
+        
+        const imageSrc = imageElement.src;
+        
+        // Utiliser l'ancien système qui refait une prédiction
+        fetch(imageSrc)
+            .then(response => response.blob())
+            .then(blob => {
+                const formData = new FormData();
+                formData.append('file', blob, 'image.jpg');
+                // Ne pas envoyer les détections pour forcer une nouvelle prédiction
+                
+                return fetch('/heatmap', {
+                    method: 'POST',
+                    body: formData
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                hideHeatmapLoading();
+                const heatmapUrl = URL.createObjectURL(blob);
+                showHeatmapModal(heatmapUrl, 'heatmap');
+            })
+            .catch(error => {
+                console.error('❌ Erreur génération heatmap (fallback):', error);
+                hideHeatmapLoading();
+                alert('❌ Erreur lors de la génération de la heatmap: ' + error.message);
+            });
+    }
+    
     window.generateOverlay = function() {
         console.log('🎯 Génération de l\'overlay de contamination...');
         
@@ -769,6 +835,31 @@ Détails: Consultez la console (F12) pour plus d'informations.`;
             alert('❌ Image d\'analyse non trouvée. Veuillez analyser une image d\'abord.');
             return;
         }
+        
+        // Vérification améliorée des données de détection
+        console.log('🔧 Vérification des données de détection:', window.detectionData);
+        
+        if (!window.detectionData || !window.detectionData.detections || !Array.isArray(window.detectionData.detections)) {
+            console.error('❌ Données de détection non trouvées ou invalides');
+            console.error('window.detectionData:', window.detectionData);
+            
+            // Proposer un fallback : faire une nouvelle prédiction via l'API
+            const shouldRetry = confirm('❌ Données de détection non trouvées.\n\nVoulez-vous que je refasse une prédiction pour générer l\'overlay ?');
+            if (shouldRetry) {
+                // Fallback : utiliser l'ancien système qui refait une prédiction
+                generateOverlayWithPrediction();
+            }
+            return;
+        }
+        
+        // Vérifier qu'il y a des détections
+        if (window.detectionData.detections.length === 0) {
+            console.warn('⚠️ Aucune détection trouvée');
+            alert('⚠️ Aucune détection trouvée dans l\'image analysée.');
+            return;
+        }
+        
+        console.log(`🔧 ${window.detectionData.detections.length} détection(s) trouvée(s)`);
         
         // Afficher l'indicateur de chargement
         showHeatmapLoading('overlay');
@@ -782,6 +873,10 @@ Détails: Consultez la console (F12) pour plus d'informations.`;
             .then(blob => {
                 const formData = new FormData();
                 formData.append('file', blob, 'image.jpg');
+                
+                // IMPORTANT: Envoyer les données de détection avec l'image
+                // pour garantir la cohérence des résultats
+                formData.append('detections', JSON.stringify(window.detectionData.detections));
                 
                 // Utiliser l'endpoint Flask local au lieu de l'API FastAPI
                 return fetch('/heatmap-overlay', {
@@ -811,6 +906,51 @@ Détails: Consultez la console (F12) pour plus d'informations.`;
                 alert('❌ Erreur lors de la génération de l\'overlay: ' + error.message);
             });
     };
+    
+    // Fonction fallback pour générer overlay avec prédiction
+    function generateOverlayWithPrediction() {
+        console.log('🎯 Génération overlay avec prédiction (fallback)...');
+        
+        const imageElement = document.getElementById('analysisImage');
+        if (!imageElement) {
+            alert('❌ Image d\'analyse non trouvée.');
+            return;
+        }
+        
+        showHeatmapLoading('overlay');
+        
+        const imageSrc = imageElement.src;
+        
+        // Utiliser l'ancien système qui refait une prédiction
+        fetch(imageSrc)
+            .then(response => response.blob())
+            .then(blob => {
+                const formData = new FormData();
+                formData.append('file', blob, 'image.jpg');
+                // Ne pas envoyer les détections pour forcer une nouvelle prédiction
+                
+                return fetch('/heatmap-overlay', {
+                    method: 'POST',
+                    body: formData
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                hideHeatmapLoading();
+                const overlayUrl = URL.createObjectURL(blob);
+                showHeatmapModal(overlayUrl, 'overlay');
+            })
+            .catch(error => {
+                console.error('❌ Erreur génération overlay (fallback):', error);
+                hideHeatmapLoading();
+                alert('❌ Erreur lors de la génération de l\'overlay: ' + error.message);
+            });
+    }
     
     function showHeatmapModal(imageUrl, type) {
         // Créer une modal pour afficher la heatmap

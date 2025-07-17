@@ -214,6 +214,22 @@ def generate_heatmap():
         if file.filename == '':
             return {"error": "Aucun fichier sélectionné"}, 400
         
+        # Récupérer les détections envoyées depuis le frontend
+        detections_data = request.form.get('detections')
+        
+        if detections_data:
+            # Utiliser les détections envoyées
+            try:
+                detections = json.loads(detections_data)
+                print(f"🔧 Utilisation des détections envoyées: {len(detections)} détection(s)")
+            except json.JSONDecodeError:
+                print("⚠️ Erreur parsing détections, fallback vers prédiction")
+                detections = None
+        else:
+            # Fallback: pas de détections envoyées, on va refaire une prédiction
+            print("🔧 Pas de détections envoyées, fallback vers prédiction")
+            detections = None
+        
         # Sauvegarder temporairement le fichier
         import tempfile
         import sys
@@ -231,23 +247,27 @@ def generate_heatmap():
         
         print(f"🔥 Génération heatmap pour: {file.filename}")
         print(f"Fichier temporaire: {temp_image_path}")
-        
         # Importer et utiliser le générateur de heatmap
         try:
             from api.utils.heatmap_generator import ContaminationHeatmapGenerator
-            from api.models.vision_model import VisionModel
             
-            # Charger le modèle et faire la prédiction
-            model = VisionModel()
-            if not model.charger_modele():
-                return {"error": "Impossible de charger le modèle de vision"}, 500
-            
-            # Obtenir les détections
-            result = model.predict(temp_image_path)
-            print(f"Résultat prédiction: {result}")
+            # Si pas de détections, faire une prédiction
+            if detections is None:
+                print("🔧 Fallback: génération des détections via prédiction")
+                from api.models.vision_model import VisionModel
+                
+                # Charger le modèle et faire la prédiction
+                model = VisionModel()
+                if not model.charger_modele():
+                    return {"error": "Impossible de charger le modèle de vision"}, 500
+                
+                # Obtenir les détections
+                result = model.predict(temp_image_path)
+                detections = result.get('detections', [])
+                print(f"🔧 {len(detections)} détection(s) générée(s) par prédiction")
             
             # Vérifier s'il y a des contaminations
-            contaminated_detections = [d for d in result.get('detections', []) if d.get('class_name') == 'contaminated']
+            contaminated_detections = [d for d in detections if d.get('class_name') == 'contaminated']
             print(f"Contaminations trouvées: {len(contaminated_detections)}")
             
             if not contaminated_detections:
@@ -259,9 +279,9 @@ def generate_heatmap():
                 from flask import Response
                 return Response(content, mimetype='image/jpeg')
             
-            # Générer la heatmap
+            # Générer la heatmap avec les détections fixées
             generator = ContaminationHeatmapGenerator()
-            heatmap_img = generator.create_contamination_heatmap(temp_image_path, result['detections'])
+            heatmap_img = generator.create_contamination_heatmap(temp_image_path, detections)
             
             # Convertir en bytes pour la réponse
             from PIL import Image
@@ -284,23 +304,29 @@ def generate_heatmap():
             # Si l'import échoue, générer une heatmap factice pour tester
             from PIL import Image, ImageDraw
             from io import BytesIO
-            import random
             
             # Charger l'image originale
             original_img = Image.open(temp_image_path)
             
-            # Créer une heatmap simple pour test
+            # Créer une heatmap simple basée sur les détections reçues
             overlay = Image.new('RGBA', original_img.size, (255, 0, 0, 0))
             draw = ImageDraw.Draw(overlay)
             
-            # Ajouter quelques zones "chaudes" factices
+            # Utiliser les détections reçues pour créer les zones chaudes
             width, height = original_img.size
-            for i in range(3):
-                x1 = random.randint(0, width//2)
-                y1 = random.randint(0, height//2)
-                x2 = x1 + random.randint(50, 150)
-                y2 = y1 + random.randint(50, 150)
-                draw.ellipse([x1, y1, x2, y2], fill=(255, 0, 0, 80))
+            for detection in detections:
+                if detection.get('class_name') == 'contaminated':
+                    box = detection.get('box', [])
+                    if len(box) == 4:
+                        # Convertir les coordonnées normalisées en pixels
+                        x1 = int(box[1] * width)
+                        y1 = int(box[0] * height)
+                        x2 = int(box[3] * width)
+                        y2 = int(box[2] * height)
+                        
+                        # Créer une zone chaude basée sur la détection
+                        intensity = int(detection.get('score', 0.5) * 255)
+                        draw.ellipse([x1, y1, x2, y2], fill=(255, 0, 0, min(intensity, 100)))
             
             # Fusionner avec l'image originale
             result_img = Image.alpha_composite(original_img.convert('RGBA'), overlay)
@@ -310,7 +336,7 @@ def generate_heatmap():
             result_img.save(img_buffer, format='PNG')
             img_buffer.seek(0)
             
-            print("✅ Heatmap factice générée (test)")
+            print("✅ Heatmap factice générée (test) avec détections fixes")
             os.unlink(temp_image_path)
             
             from flask import Response
@@ -335,6 +361,22 @@ def generate_heatmap_overlay():
         if file.filename == '':
             return {"error": "Aucun fichier sélectionné"}, 400
         
+        # Récupérer les détections envoyées depuis le frontend
+        detections_data = request.form.get('detections')
+        
+        if detections_data:
+            # Utiliser les détections envoyées
+            try:
+                detections = json.loads(detections_data)
+                print(f"🔧 Utilisation des détections envoyées: {len(detections)} détection(s)")
+            except json.JSONDecodeError:
+                print("⚠️ Erreur parsing détections, fallback vers prédiction")
+                detections = None
+        else:
+            # Fallback: pas de détections envoyées, on va refaire une prédiction
+            print("🔧 Pas de détections envoyées, fallback vers prédiction")
+            detections = None
+        
         # Sauvegarder temporairement le fichier
         import tempfile
         import sys
@@ -355,18 +397,25 @@ def generate_heatmap_overlay():
         # Importer et utiliser le générateur
         try:
             from api.utils.heatmap_generator import ContaminationHeatmapGenerator
-            from api.models.vision_model import VisionModel
             
-            # Charger le modèle et faire la prédiction
-            model = VisionModel()
-            if not model.charger_modele():
-                return {"error": "Impossible de charger le modèle de vision"}, 500
-            
-            # Obtenir les détections
-            result = model.predict(temp_image_path)
+            # Si pas de détections, faire une prédiction
+            if detections is None:
+                print("🔧 Fallback: génération des détections via prédiction")
+                from api.models.vision_model import VisionModel
+                
+                # Charger le modèle et faire la prédiction
+                model = VisionModel()
+                if not model.charger_modele():
+                    return {"error": "Impossible de charger le modèle de vision"}, 500
+                
+                # Obtenir les détections
+                result = model.predict(temp_image_path)
+                detections = result.get('detections', [])
+                print(f"🔧 {len(detections)} détection(s) générée(s) par prédiction")
             
             # Vérifier s'il y a des contaminations
-            contaminated_detections = [d for d in result.get('detections', []) if d.get('class_name') == 'contaminated']
+            contaminated_detections = [d for d in detections if d.get('class_name') == 'contaminated']
+            print(f"Contaminations trouvées: {len(contaminated_detections)}")
             
             if not contaminated_detections:
                 print("⚠️ Aucune contamination détectée, retour image originale")
@@ -376,9 +425,9 @@ def generate_heatmap_overlay():
                 from flask import Response
                 return Response(content, mimetype='image/jpeg')
             
-            # Générer l'overlay
+            # Générer l'overlay avec les détections fixées
             generator = ContaminationHeatmapGenerator()
-            overlay_img = generator.create_contamination_overlay_pil(temp_image_path, result['detections'])
+            overlay_img = generator.create_contamination_overlay_pil(temp_image_path, detections)
             
             # Convertir en bytes
             from io import BytesIO
@@ -394,31 +443,40 @@ def generate_heatmap_overlay():
             
         except ImportError as e:
             print(f"Erreur import: {e}")
-            # Overlay factice pour test
+            # Overlay factice pour test avec les détections reçues
             from PIL import Image, ImageDraw
             from io import BytesIO
-            import random
             
             # Charger l'image originale
             original_img = Image.open(temp_image_path)
             draw = ImageDraw.Draw(original_img)
             
-            # Ajouter quelques rectangles factices
+            # Utiliser les détections reçues pour créer l'overlay
             width, height = original_img.size
-            for i in range(2):
-                x1 = random.randint(0, width//2)
-                y1 = random.randint(0, height//2)
-                x2 = x1 + random.randint(80, 120)
-                y2 = y1 + random.randint(80, 120)
-                draw.rectangle([x1, y1, x2, y2], outline='red', width=3)
-                draw.text((x1, y1-20), f"Contamination {i+1}", fill='red')
+            for i, detection in enumerate(detections):
+                if detection.get('class_name') == 'contaminated':
+                    box = detection.get('box', [])
+                    if len(box) == 4:
+                        # Convertir les coordonnées normalisées en pixels
+                        x1 = int(box[1] * width)
+                        y1 = int(box[0] * height)
+                        x2 = int(box[3] * width)
+                        y2 = int(box[2] * height)
+                        
+                        # Dessiner le rectangle de contamination
+                        draw.rectangle([x1, y1, x2, y2], outline='red', width=3)
+                        
+                        # Ajouter le label avec le score
+                        score = detection.get('score', 0)
+                        label = f"Contamination {i+1} ({score:.1%})"
+                        draw.text((x1, y1-20), label, fill='red')
             
             # Convertir en bytes
             img_buffer = BytesIO()
             original_img.save(img_buffer, format='PNG')
             img_buffer.seek(0)
             
-            print("✅ Overlay factice généré (test)")
+            print("✅ Overlay factice généré (test) avec détections fixes")
             os.unlink(temp_image_path)
             
             from flask import Response
