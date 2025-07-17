@@ -1,11 +1,4 @@
-# � GaiaSense Vision - Mon```
-gaia_vision/
-├── 🧠 training/          # Notebooks de développement des modèles
-├── 🔌 api/              # Backend FastAPI avec système de versioning
-├── 🌐 frontend/         # Interface web avec Flask
-├── 📊 data_trie_utils/  # Pipeline de données et preprocessing
-└── 🖼️ api/images_a_traiter/ # Dataset d'images pour les tests
-```de Fin d'Études
+# 🌱 GaiaSense Vision - Mon Projet de Fin d'Études
 
 Salut ! Bienvenue sur mon projet de soutenance pour Alyra. J'ai développé GaiaSense Vision, une solution IA complète qui combine machine learning classique et deep learning pour l'analyse d'images.
 
