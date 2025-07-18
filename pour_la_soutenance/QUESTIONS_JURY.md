@@ -146,18 +146,18 @@
 - **Réponse** : Importance de l'architecture, choix techniques justifiés, cycle complet ML/DL, contraintes production.
 
 **Q30 : "Quelles ont été vos principales difficultés ?"**
-- **Réponse** : [Adaptez selon votre expérience] Données limitées, optimisation performances, déploiement, debugging.
+- **Réponse** : Données limitées, optimisation performances, déploiement, debugging.
 
 **Q31 : "Comment vous êtes-vous formé sur ces technologies ?"**
-- **Réponse** : Formation Alyra, documentation officielle, projets pratiques, communauté open source.
+- **Réponse** : Formation Alyra, documentation officielle, projets pratiques, communauté, youtube, intelligence artificiel.
 
 ### 🔬 Méthodes & Outils
 
 **Q32 : "Quels outils avez-vous utilisés pour le développement ?"**
-- **Réponse** : Jupyter notebooks, TensorBoard, Git, VS Code, Docker [si applicable].
+- **Réponse** : Jupyter notebooks, TensorBoard, Git, VS Code, .
 
 **Q33 : "Comment avez-vous géré le versioning de votre code ?"**
-- **Réponse** : Git avec branches features, commits atomiques, documentation, tests avant merge.
+- **Réponse** : Git avec branches features, commits atomiques, documentation, tests avant merge. 
 
 **Q34 : "Avez-vous fait des tests unitaires ?"**
 - **Réponse** : Tests sur les fonctions critiques, validation des inputs/outputs, tests d'intégration API.

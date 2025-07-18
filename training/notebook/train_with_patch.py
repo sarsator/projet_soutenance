@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Script d'entraînement avec patch tf-slim pour TensorFlow 2.15
-"""
-
 import os
 import sys
 
@@ -14,11 +9,11 @@ slim_path = os.path.join(current_dir, "tensorflow_models", "research", "slim")
 sys.path.insert(0, research_path)
 sys.path.insert(0, slim_path)
 
-# ═══════════════════════════════════════════════════════════
-# 🔧 PATCH TF-SLIM POUR TENSORFLOW 2.15
-# ═══════════════════════════════════════════════════════════
 
-print("🔧 Application du patch tf-slim...")
+# PATCH TF-SLIM POUR TENSORFLOW 2.15
+
+
+print("Application du patch tf-slim...")
 
 try:
     from tensorflow.python.ops import control_flow_ops
@@ -31,7 +26,7 @@ try:
             return tf.case(pred_fn_pairs, default=default, exclusive=exclusive, name=name)
         
         control_flow_ops.case = case_wrapper
-        print("✅ Patch control_flow_ops.case appliqué")
+        print("Patch control_flow_ops.case appliqué")
     
     # Patch pour control_flow_ops.cond 
     if not hasattr(control_flow_ops, 'cond'):
@@ -40,7 +35,7 @@ try:
             return tf.cond(pred, true_fn=true_fn, false_fn=false_fn, name=name)
         
         control_flow_ops.cond = cond_wrapper
-        print("✅ Patch control_flow_ops.cond appliqué")
+        print("Patch control_flow_ops.cond appliqué")
         
     # Patch pour control_flow_ops.while_loop si nécessaire
     if not hasattr(control_flow_ops, 'while_loop'):
@@ -59,18 +54,16 @@ try:
             )
         
         control_flow_ops.while_loop = while_loop_wrapper
-        print("✅ Patch control_flow_ops.while_loop appliqué")
+        print("Patch control_flow_ops.while_loop appliqué")
         
-    print("✅ Patch tf-slim complet")
+    print("Patch tf-slim complet")
         
 except Exception as e:
-    print(f"⚠️  Erreur de patch: {e}")
+    print(f"Erreur de patch: {e}")
 
-# ═══════════════════════════════════════════════════════════
-# 🚀 LANCEMENT DE L'ENTRAÎNEMENT
-# ═══════════════════════════════════════════════════════════
+# LANCEMENT DE L'ENTRAÎNEMENT
 
-print("🚀 Lancement de l'entraînement SSD MobileNet V2...")
+print(" Lancement de l'entraînement SSD MobileNet V2...")
 
 # Lancer le script original avec le patch appliqué
 if __name__ == '__main__':
@@ -88,8 +81,8 @@ if __name__ == '__main__':
         '--alsologtostderr'
     ]
     
-    print(f"📄 Exécution: {script_path}")
-    print(f"� Arguments: {sys.argv[1:]}")
+    print(f"Exécution: {script_path}")
+    print(f"Arguments: {sys.argv[1:]}")
     
     # Importer et exécuter le module
     exec(open(script_path).read())
