@@ -48,33 +48,41 @@ try:
                 cond=cond, body=body, loop_vars=loop_vars,
                 shape_invariants=shape_invariants, 
                 parallel_iterations=parallel_iterations,
-                back_prop=back_prop, swap_memory=swap_memory,
+                back_prop=back_prop, swap_memory=swap_memory, 
                 name=name, maximum_iterations=maximum_iterations,
                 return_same_structure=return_same_structure
             )
         
         control_flow_ops.while_loop = while_loop_wrapper
         print("Patch control_flow_ops.while_loop appliqué")
-
-    print("Tous les patches tf-slim appliqués avec succès")
-
+        
+    print("Patch tf-slim complet")
+        
 except Exception as e:
-    print(f"Erreur lors de l'application des patches: {e}")
+    print(f"Erreur de patch: {e}")
 
-if __name__ == "__main__":
-    print("\nDémarrage de l'entraînement avec patches appliqués...")
-    
+# LANCEMENT DE L'ENTRAÎNEMENT
+
+print(" Lancement de l'entraînement SSD MobileNet V2...")
+
+# Lancer le script original avec le patch appliqué
+if __name__ == '__main__':
     # Exécuter le script original model_main_tf2.py
     script_path = os.path.join(research_path, "object_detection", "model_main_tf2.py")
     
-    # CORRECTION: UTILISER LES VRAIS ARGUMENTS PASSÉS AU SCRIPT
-    print(f"Arguments reçus: {sys.argv}")
-    print(f"Exécution: {script_path}")
-    print(f"Arguments transmis: {sys.argv[1:]}")
+    # Remplacer sys.argv par les arguments appropriés
+    original_argv = sys.argv[:]
+    sys.argv = [
+        script_path,
+        '--model_dir=../models/dl_model/outputs/ssd_mnv2_320',
+        '--pipeline_config_path=../models/dl_model/outputs/ssd_mnv2_320/pipeline_working.config',
+        '--num_train_steps=30000',
+        '--sample_1_of_n_eval_examples=1',
+        '--alsologtostderr'
+    ]
     
-    # Garder les arguments originaux (ne pas les écraser !)
-    # Juste changer le nom du script
-    sys.argv[0] = script_path
+    print(f"Exécution: {script_path}")
+    print(f"Arguments: {sys.argv[1:]}")
     
     # Importer et exécuter le module
     exec(open(script_path).read())

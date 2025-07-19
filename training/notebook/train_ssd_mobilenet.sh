@@ -8,7 +8,7 @@ export PYTHONPATH="/home/sarsator/projets/gaia_vision/training/notebook/tensorfl
 cd "/home/sarsator/projets/gaia_vision/training/notebook"
 
 echo "🔍 Vérification des fichiers..."
-if [ ! -f "../models/dl_model/outputs/ssd_mnv2_320/pipeline.config" ]; then
+if [ ! -f "../models/dl_model/outputs/ssd_mnv2_320/pipeline_working.config" ]; then
     echo "❌ Fichier de configuration manquant"
     exit 1
 fi
@@ -18,7 +18,7 @@ echo "🏃 Lancement de l'entraînement avec patch tf-slim..."
 
 /home/sarsator/projets/gaia_vision/.venv/bin/python "train_with_patch.py" \
     --model_dir="../models/dl_model/outputs/ssd_mnv2_320" \
-    --pipeline_config_path="../models/dl_model/outputs/ssd_mnv2_320/pipeline.config" \
+    --pipeline_config_path="../models/dl_model/outputs/ssd_mnv2_320/pipeline_working.config" \
     --num_train_steps=30000 \
     --sample_1_of_n_eval_examples=1 \
     --alsologtostderr
