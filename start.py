@@ -5,8 +5,7 @@ import os
 from pathlib import Path
 
 def quick_start():
-    print("🚀 DÉMARRAGE COMPLET DE GAIA VISION")
-    print("=" * 50)
+    print("DÉMARRAGE COMPLET DE GAIA VISION")
     
     # Dossier de travail
     project_dir = Path("/home/sarsator/projets/gaia_vision")
@@ -14,22 +13,22 @@ def quick_start():
     tensorboard_script = project_dir / "tensorboard.sh"
     
     # Vérifications
-    print("🔍 Vérifications...")
+    print("Vérifications...")
     if not venv_python.exists():
         print(f"❌ Environnement virtuel non trouvé: {venv_python}")
-        print("   Créez-le avec: python -m venv .venv")
+        print("Créez-le avec: python -m venv .venv")
         return
     
     if not tensorboard_script.exists():
         print(f"❌ Script TensorBoard non trouvé: {tensorboard_script}")
-        print("   Le script tensorboard.sh doit être présent")
+        print("Le script tensorboard.sh doit être présent")
         return
     
     print(f"✅ Environnement virtuel: {venv_python}")
     print(f"✅ Script TensorBoard: {tensorboard_script}")
     
     # Nettoyer les processus existants
-    print("\n🧹 Nettoyage des processus existants...")
+    print("\nNettoyage des processus existants...")
     cleanup_commands = [
         "pkill -f 'python.*api/run_api.py' 2>/dev/null",
         "pkill -f 'python.*frontend/app.py' 2>/dev/null", 
@@ -45,10 +44,10 @@ def quick_start():
     print("✅ Nettoyage terminé")
     
     # Lancer les services en parallèle
-    print("\n🚀 Lancement des services...")
+    print("\nLancement des services...")
     
     # 1. API avec .venv
-    print("   🔧 Lancement de l'API...")
+    print("Lancement de l'API...")
     api_process = subprocess.Popen(
         [str(venv_python), "api/main.py"], 
         cwd=str(project_dir),
@@ -57,7 +56,7 @@ def quick_start():
     )
     
     # 2. Frontend avec .venv  
-    print("   🎨 Lancement du Frontend...")
+    print("Lancement du Frontend...")
     frontend_process = subprocess.Popen(
         [str(venv_python), "frontend/app.py"], 
         cwd=str(project_dir),
@@ -66,10 +65,10 @@ def quick_start():
     )
     
     # 3. TensorBoard (optionnel)
-    print("   📊 Lancement de TensorBoard...")
+    print("Lancement de TensorBoard...")
     tensorboard_process = None
     if tensorboard_script.exists():
-        print(f"   ✅ Script TensorBoard trouvé: {tensorboard_script}")
+        print(f"✅ Script TensorBoard trouvé: {tensorboard_script}")
         try:
             tensorboard_process = subprocess.Popen(
                 ["bash", str(tensorboard_script)], 
@@ -77,14 +76,14 @@ def quick_start():
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
-            print(f"   ✅ TensorBoard lancé (PID: {tensorboard_process.pid})")
+            print(f"✅ TensorBoard lancé (PID: {tensorboard_process.pid})")
         except Exception as e:
-            print(f"   ❌ Erreur TensorBoard: {e}")
+            print(f"❌ Erreur TensorBoard: {e}")
     else:
-        print(f"   ❌ Script TensorBoard non trouvé: {tensorboard_script}")
+        print(f"❌ Script TensorBoard non trouvé: {tensorboard_script}")
     
     # Attendre que les services démarrent
-    print("\n⏳ Attente du démarrage des services...")
+    print("\nAttente du démarrage des services...")
     for i in range(15):
         print(f"   {i+1}/15 secondes...", end="\r")
         time.sleep(1)
@@ -108,26 +107,26 @@ def quick_start():
             try:
                 stdout, stderr = tensorboard_process.communicate(timeout=1)
                 if stderr:
-                    print(f"   ⚠️  Erreur TensorBoard: {stderr.decode()[:200]}...")
+                    print(f"⚠️  Erreur TensorBoard: {stderr.decode()[:200]}...")
             except:
                 pass
     
     # Informations d'accès
-    print("\n🌐 SERVICES DISPONIBLES:")
-    print("=" * 30)
-    print("   🎨 Frontend:    http://localhost:5000")
-    print("   🔧 API:         http://localhost:8000")
-    print("   📊 TensorBoard: http://localhost:6006")
-    print("   📚 API Docs:    http://localhost:8000/docs")
+    print("\nSERVICES DISPONIBLES:")
+
+    print("Frontend:    http://localhost:5000")
+    print("API:         http://localhost:8000")
+    print("TensorBoard: http://localhost:6006")
+    print("API Docs:    http://localhost:8000/docs")
     
-    print("\n💡 CONSEILS:")
-    print("   • Ouvrez http://localhost:5000 pour l'interface principale")
-    print("   • Utilisez http://localhost:6006 pour voir l'entraînement")
-    print("   • Consultez http://localhost:8000/docs pour l'API")
+    print("\nCONSEILS:")
+    print("• Ouvrez http://localhost:5000 pour l'interface principale")
+    print("• Utilisez http://localhost:6006 pour voir l'entraînement")
+    print("• Consultez http://localhost:8000/docs pour l'API")
     
-    print("\n⚠️  POUR ARRÊTER TOUS LES SERVICES:")
-    print("   Appuyez sur Ctrl+C puis lancez:")
-    print("   pkill -f 'python.*api'; pkill -f 'python.*frontend'; pkill -f 'tensorboard'")
+    print("\nPOUR ARRÊTER TOUS LES SERVICES:")
+    print("Appuyez sur Ctrl+C puis lancez:")
+    print("pkill -f 'python.*api'; pkill -f 'python.*frontend'; pkill -f 'tensorboard'")
 
 if __name__ == "__main__":
     quick_start()

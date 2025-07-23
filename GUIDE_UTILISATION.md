@@ -1,4 +1,4 @@
-# 📖 Guide d'Utilisation - GaiaSense Vision
+# Guide d'Utilisation - GaiaSense Vision
 
 Salut ! Alors voici comment utiliser mon système. J'ai essayé de faire ça le plus simple possible, mais il y a quand même quelques petites choses à savoir.
 
@@ -22,13 +22,13 @@ python frontend/app.py
 
 Personnellement je préfère la première méthode, mais parfois on a besoin de debug et là c'est mieux d'avoir les logs séparés.
 
-## 🌐 Où aller une fois que c'est lancé
+## Où aller une fois que c'est lancé
 
 - **L'interface principale** : http://localhost:5000 (c'est là que ça se passe !)
 - **L'API REST** : http://localhost:8000 (pour les développeurs)
 - **Documentation auto** : http://localhost:8000/docs (FastAPI fait ça tout seul, c'est magique)
 
-## 📝 Comment utiliser l'interface web
+## Comment utiliser l'interface web
 
 ### Étape 1 : Remplir le formulaire
 
@@ -65,7 +65,7 @@ Mon approche c'est :
 
 C'est plus intelligent qu'un simple vote, parce que ça évite de faire de la vision quand c'est pas nécessaire.
 
-## 🔧 Pour les développeurs : Utiliser l'API directement
+## Pour les développeurs : Utiliser l'API directement
 
 ### Authentification
 
@@ -106,7 +106,7 @@ curl -X GET "http://localhost:8000/status"
 curl -X GET "http://localhost:8000/health"
 ```
 
-## 🧪 Tests et validation
+## Tests et validation
 
 ### Tests Automatiques
 ```bash
@@ -153,20 +153,20 @@ Les logs sont affichés dans la console avec :
 - `WARNING`: Problèmes non critiques
 - `ERROR`: Erreurs nécessitant attention
 
-## 🔐 Sécurité
+## Sécurité
 
 - Authentification par clé API
 - Validation des paramètres d'entrée
 - Gestion sécurisée des fichiers uploadés
 - Limitation de taille des fichiers
 
-## 📈 Performance
+## Performance
 
 - Préchargement des modèles au démarrage
 - Cache des prédictions (si implémenté)
 - Gestion optimisée des ressources
 
-## 🚀 Déploiement en Production
+## Déploiement en Production
 
 Pour un déploiement en production :
 1. Configurer une vraie clé API sécurisée

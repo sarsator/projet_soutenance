@@ -13,8 +13,7 @@ from datetime import datetime
 def launch_tensorboard():
     """Lance TensorBoard avec les bons paramètres pour votre entraînement"""
     
-    print("🔥 LANCEMENT TENSORBOARD - ENTRAÎNEMENT SSD MOBILENET V2")
-    print("=" * 60)
+    print("LANCEMENT TENSORBOARD - ENTRAÎNEMENT SSD MOBILENET V2")
     
     # Chemins vers les logs d'entraînement
     base_dir = Path("/home/sarsator/projets/gaia_vision")
@@ -27,8 +26,8 @@ def launch_tensorboard():
         base_dir / "api" / "models" / "dl_model" / "outputs" / "ssd_mnv2_simple"
     ]
     
-    print("🔍 RECHERCHE DES LOGS D'ENTRAÎNEMENT...")
-    print("-" * 40)
+    print("RECHERCHE DES LOGS D'ENTRAÎNEMENT...")
+
     
     existing_logdirs = []
     for logdir in possible_logdirs:
@@ -38,9 +37,9 @@ def launch_tensorboard():
             if event_files:
                 existing_logdirs.append(logdir)
                 print(f"✅ Logs trouvés: {logdir}")
-                print(f"   📊 Fichiers d'événements: {len(event_files)}")
+                print(f"Fichiers d'événements: {len(event_files)}")
             else:
-                print(f"📁 Dossier existe mais pas de logs: {logdir}")
+                print(f"Dossier existe mais pas de logs: {logdir}")
         else:
             print(f"❌ Dossier inexistant: {logdir}")
     
@@ -51,16 +50,16 @@ def launch_tensorboard():
     
     # Utiliser le premier dossier de logs trouvé
     logdir = existing_logdirs[0]
-    print(f"\n🎯 UTILISATION DU DOSSIER: {logdir}")
+    print(f"\nUTILISATION DU DOSSIER: {logdir}")
     
     # Paramètres TensorBoard
     port = 6006
     host = "0.0.0.0"  # Accessible depuis l'extérieur
     
-    print(f"\n🚀 LANCEMENT TENSORBOARD...")
-    print(f"   📁 Logdir: {logdir}")
-    print(f"   🌐 Host: {host}")
-    print(f"   🔌 Port: {port}")
+    print(f"\nLANCEMENT TENSORBOARD...")
+    print(f"   Logdir: {logdir}")
+    print(f"   Host: {host}")
+    print(f"   Port: {port}")
     print(f"   🔗 URL: http://localhost:{port}")
     
     # Construire la commande
@@ -77,8 +76,8 @@ def launch_tensorboard():
     print(f"   {' '.join(cmd)}")
     
     try:
-        print(f"\n🔄 DÉMARRAGE EN COURS...")
-        print(f"   ⏰ Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"\nDÉMARRAGE EN COURS...")
+        print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Lancer TensorBoard
         process = subprocess.Popen(
@@ -90,8 +89,8 @@ def launch_tensorboard():
         )
         
         # Attendre un peu et vérifier les premières lignes
-        print(f"\n📊 SORTIE TENSORBOARD:")
-        print("-" * 25)
+        print(f"\nSORTIE TENSORBOARD:")
+
         
         for i in range(10):  # Lire les premières lignes
             line = process.stdout.readline()
@@ -105,12 +104,11 @@ def launch_tensorboard():
             time.sleep(0.1)
         
         # Informations finales
-        print(f"\n🎯 TENSORBOARD EN COURS D'EXÉCUTION")
+        print(f"\nTENSORBOARD EN COURS D'EXÉCUTION")
         print(f"   🔗 URL locale: http://localhost:{port}")
-        print(f"   🔗 URL réseau: http://127.0.0.1:{port}")
-        print(f"   📁 Logs: {logdir}")
+        print(f"   Logs: {logdir}")
         
-        print(f"\n📈 MÉTRIQUES À SURVEILLER:")
+        print(f"\nMÉTRIQUES À SURVEILLER:")
         print(f"   • Loss/total_loss - Perte totale")
         print(f"   • Loss/classification_loss - Perte classification")
         print(f"   • Loss/localization_loss - Perte localisation")
@@ -118,20 +116,18 @@ def launch_tensorboard():
         print(f"   • DetectionBoxes_Recall/AR@100 - Rappel moyen")
         print(f"   • learning_rate - Taux d'apprentissage")
         
-        print(f"\n🎨 ONGLETS UTILES:")
+        print(f"\nONGLETS UTILES:")
         print(f"   • SCALARS - Courbes de perte et métriques")
         print(f"   • IMAGES - Visualisations des détections")
         print(f"   • GRAPHS - Architecture du modèle")
         print(f"   • HISTOGRAMS - Distribution des poids")
         
-        print(f"\n💡 CONSEILS:")
+        print(f"\nCONSEILS:")
         print(f"   • Utilisez Ctrl+C pour arrêter TensorBoard")
-        print(f"   • Rechargement automatique toutes les 1 seconde")
-        print(f"   • Zoomez avec la molette de la souris")
-        print(f"   • Déplacez-vous en glissant sur les graphiques")
+  
         
         # Attendre l'arrêt
-        print(f"\n⏳ APPUYEZ SUR CTRL+C POUR ARRÊTER...")
+        print(f"\nAPPUYEZ SUR CTRL+C POUR ARRÊTER...")
         try:
             process.wait()
         except KeyboardInterrupt:
@@ -174,24 +170,24 @@ def check_tensorboard_installed():
 
 def main():
     """Fonction principale"""
-    print(f"🔥 SCRIPT DE LANCEMENT TENSORBOARD")
-    print(f"   Projet: Gaia Vision - SSD MobileNet V2")
-    print(f"   Auteur: Sarsator")
-    print(f"   Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"SCRIPT DE LANCEMENT TENSORBOARD")
+    print(f"Projet: Gaia Vision - SSD MobileNet V2")
+    print(f"Auteur: Davy abderrahman")
+    print(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # Vérifier l'installation
     if not check_tensorboard_installed():
-        print(f"\n💡 INSTALLATION:")
-        print(f"   pip install tensorboard")
-        print(f"   # ou")
-        print(f"   conda install tensorboard")
+        print(f"\nINSTALLATION:")
+        print(f"pip install tensorboard")
+        print(f"# ou")
+        print(f"conda install tensorboard")
         return
     
     # Lancer TensorBoard
     success = launch_tensorboard()
     
     if success:
-        print(f"\n🎉 MISSION ACCOMPLIE !")
+        print(f"\nMISSION ACCOMPLIE !")
     else:
         print(f"\n❌ ÉCHEC DU LANCEMENT")
 

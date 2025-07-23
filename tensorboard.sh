@@ -1,19 +1,14 @@
-#!/bin/bash
-# Script simple pour lancer TensorBoard sur l'entraînement SSD
-# Utilisation: ./tensorboard.sh
 
-echo "🔥 LANCEMENT TENSORBOARD - ENTRAÎNEMENT SSD MOBILENET V2"
-echo "=========================================================="
+echo "LANCEMENT TENSORBOARD - ENTRAÎNEMENT SSD MOBILENET V2"
+
 
 # Aller dans le dossier du projet
 cd /home/sarsator/projets/gaia_vision
 
 # Dossiers possibles pour les logs
 LOGDIRS=(
-    "training/logs"
-    "training/models/dl_model/outputs/ssd_mnv2_simple"
-    "training/notebook/logs"
-    "api/models/dl_model/outputs/ssd_mnv2_simple"
+    training/models/dl_model/outputs/ssd_mnv2_320/
+
 )
 
 # Chercher le premier dossier de logs valide
@@ -30,7 +25,7 @@ for logdir in "${LOGDIRS[@]}"; do
 done
 
 if [ -z "$SELECTED_LOGDIR" ]; then
-    echo "❌ AUCUN LOG D'ENTRAÎNEMENT TROUVÉ !"
+    echo "AUCUN LOG D'ENTRAÎNEMENT TROUVÉ !"
     echo "Vérifiez que l'entraînement a bien été lancé"
     exit 1
 fi
@@ -40,37 +35,36 @@ PORT=6006
 HOST="0.0.0.0"
 
 echo ""
-echo "🚀 LANCEMENT TENSORBOARD..."
-echo "📁 Logdir: $SELECTED_LOGDIR"
-echo "🌐 Host: $HOST"
-echo "🔌 Port: $PORT"
-echo "🔗 URL: http://localhost:$PORT"
+echo "LANCEMENT TENSORBOARD..."
+echo "Logdir: $SELECTED_LOGDIR"
+echo "Host: $HOST"
+echo "Port: $PORT"
+echo "URL: http://localhost:$PORT"
 echo ""
 
 # Vérifier si TensorBoard est installé
 if ! command -v tensorboard &> /dev/null; then
-    echo "❌ TensorBoard n'est pas installé !"
+    echo "TensorBoard n'est pas installé !"
     echo "Installez-le avec: pip install tensorboard"
     exit 1
 fi
 
-echo "📋 COMMANDE: tensorboard --logdir=$SELECTED_LOGDIR --port=$PORT --host=$HOST"
-echo ""
-echo "💡 CONSEILS:"
-echo "   • Ouvrez http://localhost:$PORT dans votre navigateur"
-echo "   • Utilisez Ctrl+C pour arrêter TensorBoard"
-echo "   • Surveillez les onglets SCALARS et IMAGES"
-echo ""
-echo "⏳ APPUYEZ SUR CTRL+C POUR ARRÊTER..."
-echo ""
+echo "COMMANDE: tensorboard --logdir=$SELECTED_LOGDIR --port=$PORT --host=$HOST"
+
+echo "CONSEILS:"
+echo "Ouvrez http://localhost:$PORT dans votre navigateur"
+echo "Utilisez Ctrl+C pour arrêter TensorBoard"
+echo "Surveillez les onglets SCALARS et IMAGES"
+echo "APPUYEZ SUR CTRL+C POUR ARRÊTER..."
+
 
 # Lancer TensorBoard avec les paramètres optimaux
 tensorboard \
     --logdir="$SELECTED_LOGDIR" \
     --port=$PORT \
     --host=$HOST \
-    --reload_interval=1 \
-    --load_fast=true
+    # --reload_interval=1 \
+    # --load_fast=true
 
-echo ""
-echo "✅ TensorBoard arrêté proprement"
+
+echo "TensorBoard arrêté proprement"

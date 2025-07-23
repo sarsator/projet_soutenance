@@ -44,41 +44,85 @@ class PredictionService:
         }
         
         try:
-            # Utiliser le gestionnaire de versions pour récupérer les versions actuelles
+            # PRIORITE 1: Lire directement depuis les métadonnées du VisionModel chargé
+            if self.vision_model and hasattr(self.vision_model, 'metadata') and self.vision_model.metadata:
+                metadata_version = self.vision_model.metadata.get('version', None)
+                if metadata_version:
+                    versions["vision"] = f"v{metadata_version}"
+                    logger.info(f"🎯 Version Vision depuis métadonnées chargées: v{metadata_version}")
+            
+            # PRIORITE 2: Vérifier directement le symlink current pour la version la plus récente
+            if versions["vision"] == "v1.0":
+                try:
+                    from pathlib import Path
+                    import re
+                    current_dir = Path(__file__).parent.parent / "models" / "dl_model" / "versions"
+                    current_symlink = current_dir / "current"
+                    
+                    logger.info(f"🔍 Vérification symlink: {current_symlink}")
+                    
+                    if current_symlink.exists() and current_symlink.is_symlink():
+                        target_path = current_symlink.resolve()
+                        logger.info(f"🔗 Symlink pointe vers: {target_path.name}")
+                        
+                        version_match = re.search(r'v(\d+\.\d+)_', target_path.name)
+                        if version_match:
+                            versions["vision"] = f"v{version_match.group(1)}"
+                            logger.info(f"✅ Version Vision depuis symlink current: v{version_match.group(1)}")
+                        
+                        # Vérifier aussi les métadonnées du dossier target
+                        metadata_file = target_path / "metadata.json"
+                        if metadata_file.exists():
+                            import json
+                            with open(metadata_file, 'r') as f:
+                                metadata = json.load(f)
+                            meta_version = metadata.get('version', None)
+                            if meta_version:
+                                versions["vision"] = f"v{meta_version}"
+                                logger.info(f"📋 Version Vision depuis metadata.json: v{meta_version}")
+                                
+                except Exception as e:
+                    logger.warning(f"Erreur lecture symlink current: {e}")
+            
+            # PRIORITE 3: Utiliser le gestionnaire de versions comme fallback
+            if versions["vision"] == "v1.0" and self.version_manager:
+                try:
+                    vision_version = self.version_manager.obtenir_version_actuelle("dl_model")
+                    if vision_version:
+                        versions["vision"] = f"v{vision_version}"
+                        logger.info(f"📁 Version Vision via version manager: v{vision_version}")
+                except Exception as e:
+                    logger.warning(f"Erreur récupération version Vision via manager: {e}")
+            
+            # PRIORITE 4: Extraire depuis le chemin du modèle vision comme dernier fallback
+            if versions["vision"] == "v1.0" and self.vision_model and self.vision_model.est_charge():
+                try:
+                    if hasattr(self.vision_model, 'model_path'):
+                        model_path = str(self.vision_model.model_path)
+                        logger.info(f"📂 Chemin du modèle Vision: {model_path}")
+                        
+                        # Extraire la version depuis le chemin (ex: v1.6_20250719_200557)
+                        import re
+                        version_match = re.search(r'v(\d+\.\d+)_', model_path)
+                        if version_match:
+                            versions["vision"] = f"v{version_match.group(1)}"
+                            logger.info(f"🔍 Version vision extraite du chemin: v{version_match.group(1)}")
+                except Exception as e:
+                    logger.warning(f"Erreur extraction version depuis chemin: {e}")
+            
+            # Récupérer la version CatBoost
             if self.version_manager:
-                # Récupérer la version CatBoost actuelle
                 try:
                     catboost_version = self.version_manager.obtenir_version_actuelle("ml_model")
                     if catboost_version:
                         versions["catboost"] = f"v{catboost_version}"
                 except Exception as e:
                     logger.warning(f"Erreur récupération version CatBoost: {e}")
-                
-                # Récupérer la version Vision actuelle
-                try:
-                    vision_version = self.version_manager.obtenir_version_actuelle("dl_model")
-                    if vision_version:
-                        versions["vision"] = f"v{vision_version}"
-                except Exception as e:
-                    logger.warning(f"Erreur récupération version Vision: {e}")
-            
-            # Fallback : essayer d'extraire depuis le chemin du modèle vision
-            if versions["vision"] == "v1.0" and self.vision_model and self.vision_model.est_charge():
-                try:
-                    if hasattr(self.vision_model, 'model_path'):
-                        model_path = str(self.vision_model.model_path)
-                        # Extraire la version depuis le chemin (ex: v1.5_20250716_202917)
-                        import re
-                        version_match = re.search(r'v(\d+\.\d+)_', model_path)
-                        if version_match:
-                            versions["vision"] = f"v{version_match.group(1)}"
-                except Exception as e:
-                    logger.warning(f"Erreur extraction version depuis chemin: {e}")
                     
         except Exception as e:
             logger.warning(f"Erreur lors de la récupération des versions: {e}")
         
-        logger.info(f"🏷️  Versions des modèles récupérées: {versions}")
+        logger.info(f"🏷️  Versions finales des modèles: {versions}")
         return versions
     
     def charger_modeles(self) -> bool:
@@ -378,7 +422,7 @@ class PredictionService:
     
     def recharger_modeles(self) -> bool:
         """
-        Force le rechargement des modèles (utile après un changement de version)
+        Recharge forcément tous les modèles (utile après une mise à jour)
         
         Returns:
             bool: True si le rechargement a réussi
@@ -389,29 +433,46 @@ class PredictionService:
             # Décharger les modèles actuels
             self._models_loaded = False
             
-            # Forcer le rechargement du modèle CatBoost
+            # FORCER LA REINSTANCE COMPLETE DU VISION MODEL
+            logger.info("🔄 Réinstanciation complète du VisionModel...")
+            
+            # Détruire complètement l'ancienne instance
+            self.vision_model = None
+            
+            # Créer une nouvelle instance qui va redétecter le chemin automatiquement
+            from ..models.vision_model import VisionModel
+            self.vision_model = VisionModel()  # Sans chemin pour forcer l'auto-détection
+            
+            # Forcer le rechargement du modèle CatBoost aussi
             self.catboost_model._model = None
             self.catboost_model._model_loaded = False
-            
-            # Forcer le rechargement du modèle Vision
-            self.vision_model._model = None
-            self.vision_model._model_loaded = False
             
             # Recharger les modèles
             result = self.charger_modeles()
             
             if result:
                 logger.info("✅ Rechargement des modèles réussi")
-                # Afficher les nouvelles versions
+                
+                # Log des nouvelles versions détectées
                 versions = self.get_model_versions()
-                logger.info(f"🏷️  Nouvelles versions: {versions}")
+                logger.info(f"📋 Nouvelles versions détectées: {versions}")
+                
+                # Vérifier spécifiquement la version du modèle Vision
+                if hasattr(self.vision_model, 'metadata') and self.vision_model.metadata:
+                    vision_meta_version = self.vision_model.metadata.get('version', 'unknown')
+                    logger.info(f"🎯 Version Vision depuis métadonnées: {vision_meta_version}")
+                
+                if hasattr(self.vision_model, 'model_path'):
+                    logger.info(f"📁 Chemin Vision Model: {self.vision_model.model_path}")
+                
+                return True
             else:
                 logger.error("❌ Échec du rechargement des modèles")
+                return False
                 
-            return result
-            
         except Exception as e:
-            logger.error(f"❌ Erreur lors du rechargement des modèles: {e}")
+            logger.error(f"❌ Erreur critique lors du rechargement: {e}")
+            self._models_loaded = False
             return False
 
     def check_models_version_sync(self) -> bool:

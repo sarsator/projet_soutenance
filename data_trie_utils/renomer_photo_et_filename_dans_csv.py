@@ -56,7 +56,7 @@ def rename_photos_and_update_csv():
     csv_path = Path("../training/data/DL_data/etiquettes/annotations.csv")
     photos_dir = Path("../training/data/DL_data/photos")
     
-    print("🚀 DÉBUT DU NETTOYAGE DES NOMS DE FICHIERS")
+    print("DÉBUT DU NETTOYAGE DES NOMS DE FICHIERS")
     print("=" * 60)
     
     # Vérification des chemins
@@ -77,7 +77,7 @@ def rename_photos_and_update_csv():
             reader = csv.DictReader(file)
             data = list(reader)
             fieldnames = reader.fieldnames
-        print(f"📊 CSV chargé: {len(data)} lignes")
+        print(f"CSV chargé: {len(data)} lignes")
     except Exception as e:
         print(f"❌ ERREUR lors du chargement du CSV: {e}")
         return False
@@ -94,9 +94,9 @@ def rename_photos_and_update_csv():
     if has_nom_image:
         print("✅ Colonne 'nom_image' détectée")
     else:
-        print("ℹ️ Colonne 'nom_image' non présente")
+        print("Colonne 'nom_image' non présente")
     
-    print(f"📋 Colonnes disponibles: {list(fieldnames)}")
+    print(f"Colonnes disponibles: {list(fieldnames)}")
     
     # Compteurs pour le rapport
     files_processed = 0
@@ -104,7 +104,7 @@ def rename_photos_and_update_csv():
     files_not_found = 0
     csv_updated = 0
     
-    print(f"\n🔄 TRAITEMENT DES FICHIERS...")
+    print(f"\nTRAITEMENT DES FICHIERS...")
     
     # Traitement de chaque ligne
     for idx, row in enumerate(data):
@@ -117,7 +117,7 @@ def rename_photos_and_update_csv():
         if original_filename == cleaned_filename:
             continue
         
-        print(f"\n📝 Ligne {idx + 1}: {original_filename} → {cleaned_filename}")
+        print(f"\nLigne {idx + 1}: {original_filename} → {cleaned_filename}")
         
         # Chemins des fichiers
         original_photo_path = photos_dir / original_filename
@@ -125,13 +125,13 @@ def rename_photos_and_update_csv():
         
         # Vérifier si la photo originale existe
         if not original_photo_path.exists():
-            print(f"⚠️  Photo non trouvée: {original_photo_path}")
+            print(f"Photo non trouvée: {original_photo_path}")
             files_not_found += 1
             continue
         
         # Vérifier si le nouveau nom existe déjà
         if cleaned_photo_path.exists() and cleaned_photo_path != original_photo_path:
-            print(f"⚠️  Le fichier {cleaned_filename} existe déjà, ajout d'un suffixe")
+            print(f"Le fichier {cleaned_filename} existe déjà, ajout d'un suffixe")
             # Ajouter un suffixe numérique
             name, ext = os.path.splitext(cleaned_filename)
             counter = 1
@@ -139,7 +139,7 @@ def rename_photos_and_update_csv():
                 cleaned_filename = f"{name}_{counter}{ext}"
                 cleaned_photo_path = photos_dir / cleaned_filename
                 counter += 1
-            print(f"📝 Nouveau nom: {cleaned_filename}")
+            print(f"Nouveau nom: {cleaned_filename}")
         
         try:
             # Renommer la photo
@@ -168,38 +168,38 @@ def rename_photos_and_update_csv():
                 writer = csv.DictWriter(file, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(data)
-            print(f"\n💾 CSV mis à jour et sauvegardé: {csv_path}")
+            print(f"\nCSV mis à jour et sauvegardé: {csv_path}")
         except Exception as e:
             print(f"❌ ERREUR lors de la sauvegarde du CSV: {e}")
             return False
     else:
-        print(f"\n📝 Aucune modification nécessaire dans le CSV")
+        print(f"\nAucune modification nécessaire dans le CSV")
     
     # Rapport final
-    print(f"\n📊 RAPPORT FINAL:")
-    print(f"=" * 40)
-    print(f"📄 Fichiers traités: {files_processed}")
-    print(f"🔄 Fichiers renommés: {files_renamed}")
-    print(f"📝 Lignes CSV mises à jour: {csv_updated}")
-    print(f"❌ Photos non trouvées: {files_not_found}")
+    print(f"\nRAPPORT FINAL:")
+
+    print(f"Fichiers traités: {files_processed}")
+    print(f"Fichiers renommés: {files_renamed}")
+    print(f"Lignes CSV mises à jour: {csv_updated}")
+    print(f"Photos non trouvées: {files_not_found}")
     
     if files_renamed > 0:
         print(f"\n✅ SUCCÈS: {files_renamed} fichiers nettoyés avec succès!")
     else:
-        print(f"\n✨ PARFAIT: Tous les noms de fichiers sont déjà propres!")
+        print(f"\nPARFAIT: Tous les noms de fichiers sont déjà propres!")
     
     return True
 
 def main():
     """Point d'entrée principal"""
     print("🧹 SCRIPT DE NETTOYAGE DES NOMS DE FICHIERS")
-    print("=" * 60)
+
     print("Ce script va:")
     print("1. Lire le fichier annotations.csv")
     print("2. Nettoyer les noms de fichiers (espaces → underscores, caractères spéciaux)")
     print("3. Renommer les photos correspondantes")
     print("4. Mettre à jour le CSV directement (pas de sauvegarde)")
-    print("=" * 60)
+
     
     # Demander confirmation
     response = input("\n🤔 Voulez-vous continuer? (o/n): ").lower().strip()
@@ -211,9 +211,9 @@ def main():
     success = rename_photos_and_update_csv()
     
     if success:
-        print(f"\n🎉 TERMINÉ AVEC SUCCÈS!")
+        print(f"TERMINÉ AVEC SUCCÈS!")
     else:
-        print(f"\n💥 ÉCHEC DU TRAITEMENT")
+        print(f"\nÉCHEC DU TRAITEMENT")
 
 if __name__ == "__main__":
     main()

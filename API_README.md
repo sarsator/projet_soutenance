@@ -1,8 +1,8 @@
-# 🔌 Gaia Vision API - Documentation Technique
+# Gaia Vision API - Documentation Technique
 
 Hey ! Voici la doc de mon API. J'ai essayé de faire quelque chose de propre et professionnel, avec une orchestration intelligente de deux modèles différents.
 
-## 🏗️ L'idée derrière l'architecture
+## L'idée derrière l'architecture
 
 Mon système combine deux approches complémentaires :
 
@@ -19,24 +19,24 @@ J'ai pas fait un simple vote entre les deux modèles. Mon approche est plus smar
 
 Pourquoi cette approche ? Parce que l'analyse d'image coûte plus cher en ressources, donc autant l'éviter quand c'est pas nécessaire !
 
-## 🌱 Installation et setup
+## Installation et setup
 
 ### Étape 1 : Récupérer le code
-```bash
+bash
 git clone <votre-repo>
 cd gaia_vision
-```
+
 
 ### Étape 2 : Installer tout ce qu'il faut
-```bash
+bash
 pip install -r requirements.txt
-```
+
 
 ### Étape 3 : Configuration (optionnelle)
-```bash
+bash
 cp .env.example .env
 # Modifiez le .env si vous voulez changer des trucs
-```
+
 
 ### Étape 4 : Vérifier que les modèles sont là
 - Modèle CatBoost : `api/models/ml_model/model_catboost_best.joblib`
@@ -47,20 +47,20 @@ Si ils sont pas là, il faut les entraîner avec les notebooks !
 ## � Lancement
 
 ### Juste l'API
-```bash
+bash
 python -m api.run_api
-```
+
 
 ### Tout le système (API + Interface)
-```bash
+bash
 python run_gaia_vision.py
-```
+
 
 ### Développement avec reload
-```bash
+bash
 cd api
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
+
 
 ## Endpoints
 
@@ -94,12 +94,12 @@ Prédiction basée uniquement sur les paramètres (CatBoost seul)
 
 ## Exemple d'utilisation
 
-```python
+python
 import requests
 
 # Configuration
 API_URL = "http://localhost:8000"
-API_KEY = "your-secret-api-key"
+API_KEY = "votre_clé_api"
 
 # Prédiction avec image
 headers = {"Authorization": f"Bearer {API_KEY}"}
@@ -123,11 +123,11 @@ response = requests.post(
 result = response.json()
 print(f"Prédiction: {result['prediction']}")
 print(f"Confiance: {result['confidence']}")
-```
+
 
 ## Réponse API
 
-```json
+json
 {
   "prediction": "sain",
   "confidence": 0.85,
@@ -161,14 +161,14 @@ print(f"Confiance: {result['confidence']}")
     "image_file": "abc123.jpg"
   }
 }
-```
+
 
 ## Tests
 
 Lancer les tests automatiques :
-```bash
+bash
 python test_api.py
-```
+
 
 ## Configuration avancée
 
@@ -180,7 +180,7 @@ python test_api.py
 
 ## Structure du projet
 
-```
+
 api/
 ├── main.py              # Point d'entrée FastAPI
 ├── config.py            # Configuration centralisée
@@ -192,7 +192,7 @@ api/
 └── utils/               # Services et utilitaires
     ├── prediction_service.py
     └── __init__.py
-```
+
 
 ## Logs
 
@@ -218,8 +218,8 @@ Pour un déploiement en production :
 4. Implémentez du monitoring et des métriques
 5. Configurez SSL/TLS
 
-```bash
+bash
 # Exemple avec Gunicorn
 pip install gunicorn
 gunicorn api.main:app -w 4 -k uvicorn.workers.UvicornWorker
-```
+

@@ -2,7 +2,6 @@
 # Script de démarrage rapide pour Gaia Vision
 # Usage: ./start.sh
 echo "DÉMARRAGE RAPIDE GAIA VISION"
-echo "================================"
 
 # Aller dans le dossier du projet
 cd /home/sarsator/projets/gaia_vision
@@ -24,15 +23,15 @@ pkill -f 'tensorboard' 2>/dev/null
 lsof -ti:8000,5000,6006 | xargs -r kill -9 2>/dev/null
 
 # Lancer les services
-echo "🚀 Lancement des services..."
+echo "Lancement des services..."
 
 # API
-echo "   🔧 API..."
+echo "API..."
 .venv/bin/python api/main.py &
 API_PID=$!
 
 # Frontend  
-echo "   Frontend..."
+echo "Frontend..."
 .venv/bin/python frontend/app.py &
 FRONTEND_PID=$!
 
@@ -42,7 +41,7 @@ if [ -f "tensorboard.sh" ]; then
     bash tensorboard.sh &
     TENSORBOARD_PID=$!
 else
-    echo "      ⚠️  tensorboard.sh non trouvé"
+    echo "tensorboard.sh non trouvé"
 fi
 
 # Attendre
@@ -51,7 +50,6 @@ sleep 10
 
 echo ""
 echo " SERVICES DISPONIBLES:"
-echo "========================"
 echo "    Frontend:    http://localhost:5000"
 echo "    API:         http://localhost:8000"
 echo "    TensorBoard: http://localhost:6006"
@@ -64,5 +62,5 @@ echo "✅ Tous les services sont lancés !"
 
 # Attendre Ctrl+C
 trap 'echo ""; echo "🛑 Arrêt des services..."; kill $API_PID $FRONTEND_PID $TENSORBOARD_PID 2>/dev/null; exit 0' INT
-echo "⏳ Appuyez sur Ctrl+C pour arrêter tous les services..."
+echo "Appuyez sur Ctrl+C pour arrêter tous les services..."
 wait

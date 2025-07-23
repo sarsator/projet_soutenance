@@ -12,22 +12,22 @@ def verify_photos_existence():
     photos_dir = Path("../training/data/DL_data/photos")
     
     print("🔍 VÉRIFICATION DE L'EXISTENCE DES PHOTOS")
-    print("=" * 60)
+
     
     # Vérification de l'existence des chemins
     if not csv_path.exists():
         print(f"❌ ERREUR: Fichier CSV non trouvé: {csv_path}")
-        print(f"📁 Chemin absolu: {csv_path.resolve()}")
+        print(f"Chemin absolu: {csv_path.resolve()}")
         return False
     
     if not photos_dir.exists():
         print(f"❌ ERREUR: Dossier photos non trouvé: {photos_dir}")
-        print(f"📁 Chemin absolu: {photos_dir.resolve()}")
+        print(f"Chemin absolu: {photos_dir.resolve()}")
         return False
     
     print(f"✅ Fichier CSV trouvé: {csv_path}")
     print(f"✅ Dossier photos trouvé: {photos_dir}")
-    print(f"📁 Chemin absolu photos: {photos_dir.resolve()}")
+    print(f"Chemin absolu photos: {photos_dir.resolve()}")
     
     # Lecture du fichier CSV
     try:
@@ -36,8 +36,8 @@ def verify_photos_existence():
             data = list(reader)
             fieldnames = reader.fieldnames
         
-        print(f"📊 CSV lu: {len(data)} lignes")
-        print(f"📋 Colonnes: {list(fieldnames)}")
+        print(f"CSV lu: {len(data)} lignes")
+        print(f"Colonnes: {list(fieldnames)}")
         
     except Exception as e:
         print(f"❌ ERREUR lors de la lecture du CSV: {e}")
@@ -72,26 +72,26 @@ def verify_photos_existence():
                 print(f"❌ {i:3d}/{total_files}: {filename} - MANQUANT")
     
     # Résumé
-    print(f"\n📊 RÉSUMÉ DE LA VÉRIFICATION:")
-    print(f"=" * 40)
-    print(f"📄 Total de fichiers dans le CSV: {total_files}")
-    print(f"✅ Photos existantes: {existing_files}")
-    print(f"❌ Photos manquantes: {missing_files}")
-    print(f"📈 Taux de succès: {(existing_files/total_files)*100:.1f}%")
+    print(f"\nRÉSUMÉ DE LA VÉRIFICATION:")
+
+    print(f"Total de fichiers dans le CSV: {total_files}")
+    print(f"Photos existantes: {existing_files}")
+    print(f"Photos manquantes: {missing_files}")
+    print(f"Taux de succès: {(existing_files/total_files)*100:.1f}%")
     
     if missing_files > 0:
-        print(f"\n⚠️  PHOTOS MANQUANTES:")
+        print(f"\nPHOTOS MANQUANTES:")
         if missing_files <= 20:
             # Afficher toutes si peu nombreuses
             for filename in missing_list:
                 print(f"   - {filename}")
         else:
             # Afficher les 15 premières et 5 dernières
-            print("   Premières manquantes:")
+            print("Premières manquantes:")
             for filename in missing_list[:15]:
                 print(f"   - {filename}")
             print(f"   ... ({missing_files - 20} autres) ...")
-            print("   Dernières manquantes:")
+            print("Dernières manquantes:")
             for filename in missing_list[-5:]:
                 print(f"   - {filename}")
         
@@ -103,15 +103,15 @@ def verify_photos_existence():
                 writer.writerow(['filename'])
                 for filename in missing_list:
                     writer.writerow([filename])
-            print(f"\n💾 Liste des photos manquantes sauvegardée: {missing_csv_path}")
+            print(f"\nListe des photos manquantes sauvegardée: {missing_csv_path}")
         except Exception as e:
-            print(f"⚠️ Impossible de sauvegarder la liste: {e}")
+            print(f"Impossible de sauvegarder la liste: {e}")
     
     else:
-        print(f"\n🎉 PARFAIT: Toutes les photos existent!")
+        print(f"\nPARFAIT: Toutes les photos existent!")
     
     # Vérification inverse: photos dans le dossier mais pas dans le CSV
-    print(f"\n🔄 Vérification inverse: photos orphelines...")
+    print(f"\nVérification inverse: photos orphelines...")
     try:
         # Extensions d'images courantes
         image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'}
@@ -128,37 +128,37 @@ def verify_photos_existence():
         # Photos orphelines (dans dossier mais pas dans CSV)
         orphan_photos = photos_in_dir - photos_in_csv
         
-        print(f"📁 Photos dans le dossier: {len(photos_in_dir)}")
-        print(f"📄 Photos dans le CSV: {len(photos_in_csv)}")
-        print(f"🔍 Photos orphelines: {len(orphan_photos)}")
+        print(f"Photos dans le dossier: {len(photos_in_dir)}")
+        print(f"Photos dans le CSV: {len(photos_in_csv)}")
+        print(f"Photos orphelines: {len(orphan_photos)}")
         
         if orphan_photos:
-            print(f"\n📋 Quelques photos orphelines (dans dossier mais pas dans CSV):")
+            print(f"\nQuelques photos orphelines (dans dossier mais pas dans CSV):")
             for i, photo in enumerate(sorted(orphan_photos)[:10]):
                 print(f"   - {photo}")
             if len(orphan_photos) > 10:
                 print(f"   ... et {len(orphan_photos) - 10} autres")
     
     except Exception as e:
-        print(f"⚠️ Erreur lors de la vérification inverse: {e}")
+        print(f"Erreur lors de la vérification inverse: {e}")
     
     # Statut final
     success = missing_files == 0
     if success:
-        print(f"\n✅ VALIDATION RÉUSSIE: Toutes les photos du train.csv existent!")
+        print(f"\nVALIDATION RÉUSSIE: Toutes les photos du train.csv existent!")
     else:
-        print(f"\n⚠️ VALIDATION ÉCHOUÉE: {missing_files} photos manquantes sur {total_files}")
+        print(f"\nVALIDATION ÉCHOUÉE: {missing_files} photos manquantes sur {total_files}")
         
     return success
 
 def main():
     """Point d'entrée principal"""
-    print("📸 VÉRIFICATEUR D'EXISTENCE DES PHOTOS")
-    print("=" * 60)
+    print("VÉRIFICATEUR D'EXISTENCE DES PHOTOS")
+
     print("Ce script vérifie que toutes les photos référencées dans")
     print("training/data/DL_data/splits/train.csv existent bien dans")
     print("training/data/DL_data/photos/")
-    print("=" * 60)
+
     
     success = verify_photos_existence()
     
@@ -166,9 +166,9 @@ def main():
     exit_code = 0 if success else 1
     
     if success:
-        print(f"\n🎉 SUCCÈS: Toutes les vérifications sont passées!")
+        print(f"\nSUCCÈS: Toutes les vérifications sont passées!")
     else:
-        print(f"\n💥 ÉCHEC: Des photos sont manquantes!")
+        print(f"\nÉCHEC: Des photos sont manquantes!")
         
     sys.exit(exit_code)
 

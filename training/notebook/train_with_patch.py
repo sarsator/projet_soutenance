@@ -1,5 +1,7 @@
 import os
 import sys
+import datetime
+import subprocess
 
 # Ajouter les chemins nécessaires
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -64,17 +66,68 @@ except Exception as e:
 if __name__ == "__main__":
     print("\nDémarrage de l'entraînement avec patches appliqués...")
     
+    # Créer le fichier de log avec timestamp
+    
+    
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = f"training_log_{timestamp}.txt"
+    
     # Exécuter le script original model_main_tf2.py
     script_path = os.path.join(research_path, "object_detection", "model_main_tf2.py")
     
-    # CORRECTION: UTILISER LES VRAIS ARGUMENTS PASSÉS AU SCRIPT
     print(f"Arguments reçus: {sys.argv}")
     print(f"Exécution: {script_path}")
     print(f"Arguments transmis: {sys.argv[1:]}")
+    print(f"Log de sortie: {log_file}")
     
-    # Garder les arguments originaux (ne pas les écraser !)
-    # Juste changer le nom du script
-    sys.argv[0] = script_path
+    # Préparer la commande avec les arguments originaux
+    cmd = [sys.executable, script_path] + sys.argv[1:]
     
-    # Importer et exécuter le module
-    exec(open(script_path).read())
+    # Configurer l'environnement
+    env = os.environ.copy()
+    env['PYTHONPATH'] = f"{research_path}:{slim_path}:{env.get('PYTHONPATH', '')}"
+    
+    print(f"Commande: {' '.join(cmd)}")
+    print(f"Démarrage de l'entraînement... (logs dans {log_file})")
+    
+    # Exécuter avec redirection vers fichier ET console
+    try:
+        with open(log_file, 'w') as f:
+            # Écrire l'en-tête du log
+            f.write(f"=== ENTRAINEMENT SSD MOBILENET V2 ===\n")
+            f.write(f"Date: {datetime.datetime.now()}\n")
+            f.write(f"Commande: {' '.join(cmd)}\n")
+            f.write(f"PYTHONPATH: {env['PYTHONPATH']}\n")
+
+            f.flush()
+            
+            # Lancer le processus avec redirection
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+                env=env,
+                bufsize=1
+            )
+            
+            # Lire et afficher en temps réel + sauvegarder
+            for line in iter(process.stdout.readline, ''):
+                print(line.rstrip())  # Afficher sur console
+                f.write(line)         # Sauvegarder dans fichier
+                f.flush()             # Forcer l'écriture
+            
+            process.wait()
+            
+            # Écrire le statut final
+            f.write(f"\n" + "=" * 50 + "\n")
+            f.write(f"Fin de l'entraînement: {datetime.datetime.now()}\n")
+            f.write(f"Code de retour: {process.returncode}\n")
+            
+        print(f"\nEntraînement terminé. Code de retour: {process.returncode}")
+        print(f"Log complet sauvé dans: {log_file}")
+        
+    except Exception as e:
+        print(f"Erreur lors de l'exécution: {e}")
+        with open(log_file, 'a') as f:
+            f.write(f"\nERREUR: {e}\n")

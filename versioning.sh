@@ -14,7 +14,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 GAIA VISION - SYSTÈME DE VERSIONING${NC}"
+echo -e "${BLUE}GAIA VISION - SYSTÈME DE VERSIONING${NC}"
 echo -e "${BLUE}=====================================${NC}"
 
 # Fonction d'aide
@@ -35,7 +35,7 @@ show_help() {
 
 # Fonction pour afficher les logs
 show_logs() {
-    echo -e "${BLUE}📝 DERNIERS LOGS:${NC}"
+    echo -e "${BLUE}DERNIERS LOGS:${NC}"
     echo "=============="
     LATEST_LOG=$(ls -t $SCRIPT_DIR/logs/versioning_*.log | head -1)
     if [ -f "$LATEST_LOG" ]; then
@@ -49,7 +49,7 @@ show_logs() {
 
 # Fonction de nettoyage
 cleanup_versions() {
-    echo -e "${YELLOW}🧹 NETTOYAGE DES ANCIENNES VERSIONS${NC}"
+    echo -e "${YELLOW}NETTOYAGE DES ANCIENNES VERSIONS${NC}"
     echo "================================="
     
     echo -e "${BLUE}Nettoyage SSD (garde 3 versions)...${NC}"
@@ -58,7 +58,7 @@ cleanup_versions() {
     echo -e "${BLUE}Nettoyage CatBoost (garde 3 versions)...${NC}"
     cd "$SCRIPT_DIR" && python "$VERSIONING_SCRIPT" cleanup ml --keep 3
     
-    echo -e "${GREEN}✅ Nettoyage terminé${NC}"
+    echo -e "${GREEN}Nettoyage terminé${NC}"
 }
 
 # Fonction de déploiement
@@ -67,15 +67,15 @@ deploy_model() {
     
     case $model_type in
         "ssd"|"dl")
-            echo -e "${BLUE}🎯 Déploiement SSD MobileNet V2...${NC}"
+            echo -e "${BLUE}Déploiement SSD MobileNet V2...${NC}"
             cd "$SCRIPT_DIR" && python "$VERSIONING_SCRIPT" deploy dl
             ;;
         "catboost"|"ml")
-            echo -e "${BLUE}🎯 Déploiement CatBoost...${NC}"
+            echo -e "${BLUE}Déploiement CatBoost...${NC}"
             cd "$SCRIPT_DIR" && python "$VERSIONING_SCRIPT" deploy ml
             ;;
         "both"|"all")
-            echo -e "${BLUE}🎯 Déploiement des deux modèles...${NC}"
+            echo -e "${BLUE}Déploiement des deux modèles...${NC}"
             echo ""
             echo -e "${YELLOW}1/2 - Déploiement SSD...${NC}"
             cd "$SCRIPT_DIR" && python "$VERSIONING_SCRIPT" deploy dl
@@ -83,10 +83,10 @@ deploy_model() {
             echo -e "${YELLOW}2/2 - Déploiement CatBoost...${NC}"
             cd "$SCRIPT_DIR" && python "$VERSIONING_SCRIPT" deploy ml
             echo ""
-            echo -e "${GREEN}✅ Déploiement complet terminé${NC}"
+            echo -e "${GREEN}Déploiement complet terminé${NC}"
             ;;
         *)
-            echo -e "${RED}❌ Type de modèle invalide: $model_type${NC}"
+            echo -e "${RED}Type de modèle invalide: $model_type${NC}"
             echo "Types supportés: ssd, catboost, both"
             exit 1
             ;;
@@ -103,7 +103,7 @@ case $1 in
         ;;
     "deploy")
         if [ -z "$2" ]; then
-            echo -e "${RED}❌ Spécifiez le type de modèle à déployer${NC}"
+            echo -e "${RED}Spécifiez le type de modèle à déployer${NC}"
             show_help
             exit 1
         fi
@@ -119,7 +119,7 @@ case $1 in
         show_help
         ;;
     *)
-        echo -e "${RED}❌ Commande inconnue: $1${NC}"
+        echo -e "${RED}Commande inconnue: $1${NC}"
         echo ""
         show_help
         exit 1

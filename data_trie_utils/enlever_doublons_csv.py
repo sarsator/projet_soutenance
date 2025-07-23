@@ -173,7 +173,7 @@ def main():
     # Résumé final
     print("\n=== Résumé ===")
     print(f"✅ Lignes conservées: {nb_conservees}")
-    print(f"🗑️  Lignes supprimées: {nb_supprimees}")
+    print(f"❌  Lignes supprimées: {nb_supprimees}")
     
     if nb_supprimees > 0:
         print(f"📁 Lignes supprimées sauvegardées dans: photos_en_doublons.csv")
@@ -182,7 +182,7 @@ def main():
     if nb_conservees == 0 and nb_supprimees == 0:
         print("❌ Aucune opération effectuée.")
     elif nb_supprimees == 0:
-        print("✨ Aucune ligne à supprimer trouvée. Le CSV est déjà propre!")
+        print(" Aucune ligne à supprimer trouvée. Le CSV est déjà propre!")
     else:
         print("✅ Nettoyage terminé avec succès.")
 

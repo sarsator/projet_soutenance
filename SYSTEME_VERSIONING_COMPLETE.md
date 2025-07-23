@@ -1,9 +1,9 @@
-# 🎯 Mon Système de Versioning pour Gaia Vision
+# Mon Système de Versioning pour Gaia Vision
 
-## 📋 Ce que j'ai implémenté
+## Ce que j'ai implémenté
 
 système de versioning automatique pour les modèles ML/DL.
-### ✅ Ce qui marche maintenant
+###  Ce qui marche maintenant
 
 **1. Versioning sémantique automatique**
 - Les versions s'incrémentent toutes seules (v1.0, v1.1, v1.2...)
@@ -31,19 +31,19 @@ api/models/
 ```
 
 **3. Intégration dans les notebooks**
-- ✅ Machine_learning.ipynb : Déploiement CatBoost avec versioning
-- ✅ dl_finetuning.ipynb : Déploiement SSD MobileNet V2 avec TensorFlow Object Detection API
-- ✅ deployement_model_dl.ipynb : Déploiement automatique des modèles de vision
-- ✅ Interface simple : juste une cellule à exécuter
-- ✅ Confirmation avant déploiement (évite les erreurs)
-- ✅ Test automatique du modèle une fois déployé
+-  Machine_learning.ipynb : Déploiement CatBoost avec versioning
+-  dl_finetuning.ipynb : Déploiement SSD MobileNet V2 avec TensorFlow Object Detection API
+-  deployement_model_dl.ipynb : Déploiement automatique des modèles de vision
+-  Interface simple : juste une cellule à exécuter
+-  Confirmation avant déploiement (évite les erreurs)
+-  Test automatique du modèle une fois déployé
 
 **4. Configuration adaptée**
-- ✅ api/config.py adapté pour utiliser les liens symboliques
-- ✅ Chemins de fallback au cas où (toujours prévoir le pire !)
-- ✅ Chargement automatique de la version active
+-  api/config.py adapté pour utiliser les liens symboliques
+-  Chemins de fallback au cas où (toujours prévoir le pire !)
+-  Chargement automatique de la version active
 
-## 🔧 Comment ça marche techniquement
+## Comment ça marche techniquement
 
 ### ModelVersionManager (api/models/model_version_manager.py)
 
@@ -76,20 +76,20 @@ VISION_MODEL_FALLBACK = MODELS_BASE_DIR / "dl_model" / "saved_model"  # SavedMod
 ### Modèles (catboost_model.py / vision_model.py)
 
 Les modèles chargent automatiquement la bonne version :
-- ✅ Chargement via les liens symboliques 'current'
-- ✅ Fallback automatique si problème
-- ✅ Gestion d'erreur robuste
+-  Chargement via les liens symboliques 'current'
+-  Fallback automatique si problème
+-  Gestion d'erreur robuste
 
-## 📊 Preuve que ça marche
+## Preuve que ça marche
 
 ### Test réussi en live avec SSD MobileNet V2 :
 
 ```bash
-🚀 DÉMONSTRATION DU SYSTÈME DE DÉPLOIEMENT
-📱 Modèle SSD MobileNet V2 trouvé : 22.8 MB (SavedModel)
-🔄 Déploiement en cours...
+DÉMONSTRATION DU SYSTÈME DE DÉPLOIEMENT
+Modèle SSD MobileNet V2 trouvé : 22.8 MB (SavedModel)
+Déploiement en cours...
 
-🎉 Déploiement réussi !
+Déploiement réussi !
    • Version : 1.3
    • Timestamp : 2025-07-16 13:25:18
    • ID déploiement : 20250716_132518
@@ -97,40 +97,40 @@ Les modèles chargent automatiquement la bonne version :
    • Format : TensorFlow SavedModel
    • Lien symbolique : api/models/dl_model/current
 
-📊 État après déploiement :
+État après déploiement :
    • Version active : 1.3
    • Nombre total de versions : 4
-   • Lien symbolique actif : ✅
+   • Lien symbolique actif : 
    • Pointe vers : ../versions/v1.3_20250716_132518/saved_model
    • Modèle accessible : True
-   • Test de prédiction : ✅ Détection fonctionnelle
+   • Test de prédiction :  Détection fonctionnelle
    • Seuil optimisé : 0.12 (contamination sensible)
 ```
 
-## 🎓 Pourquoi c'est bien pour la soutenance
+## Pourquoi c'est bien pour la soutenance
 
 ### Côté technique :
-- ✅ **Traçabilité** : Chaque modèle est versionné et tracé
-- ✅ **Sécurité** : Rollback possible en cas de régression
-- ✅ **Automatisation** : Plus besoin de copier manuellement les modèles
-- ✅ **Organisation** : Structure claire et prévisible
+-  **Traçabilité** : Chaque modèle est versionné et tracé
+-  **Sécurité** : Rollback possible en cas de régression
+-  **Automatisation** : Plus besoin de copier manuellement les modèles
+-  **Organisation** : Structure claire et prévisible
 
 ### Pour la production :
-- ✅ **Fiabilité** : Les liens symboliques assurent la continuité
-- ✅ **Maintenance** : Nettoyage automatique de l'espace disque
-- ✅ **Monitoring** : Historique complet des déploiements
-- ✅ **Débogage** : Possibilité de revenir à une version antérieure
+-  **Fiabilité** : Les liens symboliques assurent la continuité
+-  **Maintenance** : Nettoyage automatique de l'espace disque
+-  **Monitoring** : Historique complet des déploiements
+-  **Débogage** : Possibilité de revenir à une version antérieure
 
 ### Pour la soutenance :
-- ✅ **Professionnalisme** : Système enterprise-grade avec TensorFlow Object Detection API
-- ✅ **Reproductibilité** : Chaque expérience est sauvegardée avec métadonnées complètes
-- ✅ **Documentation** : Métadonnées automatiques (architecture, taille, seuils)
-- ✅ **Démonstration** : Scripts prêts pour présentation + interface heatmap
-- ✅ **Innovation** : Détection d'objets spécialisée avec visualisation thermique
+-  **Professionnalisme** : Système enterprise-grade avec TensorFlow Object Detection API
+-  **Reproductibilité** : Chaque expérience est sauvegardée avec métadonnées complètes
+-  **Documentation** : Métadonnées automatiques (architecture, taille, seuils)
+-  **Démonstration** : Scripts prêts pour présentation + interface heatmap
+-  **Innovation** : Détection d'objets spécialisée avec visualisation thermique
 
-## 🎯 STATUT FINAL
+## STATUT FINAL
 
-**SYSTÈME COMPLET ET OPÉRATIONNEL** ✅
+**SYSTÈME COMPLET ET OPÉRATIONNEL** 
 
 - [x] ModelVersionManager implémenté et testé
 - [x] Configuration mise à jour
@@ -142,7 +142,7 @@ Les modèles chargent automatiquement la bonne version :
 - [x] **NOUVEAU** : Système de heatmap avec visualisation thermique
 - [x] **NOUVEAU** : Interface web avec détection temps réel
 
-## 🔥 Fonctionnalités avancées du modèle SSD v1.3
+## Fonctionnalités avancées du modèle SSD v1.3
 
 ### Architecture de pointe :
 - **SSD MobileNet V2 320x320** - TensorFlow Object Detection API

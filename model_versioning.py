@@ -24,8 +24,8 @@ class ModelVersioningCLI:
         self.models_dir = Path("/home/sarsator/projets/gaia_vision/api/models")
         self.manager = ModelVersionManager(self.models_dir)
         
-        self.logger.info("🚀 Système de versioning initialisé")
-        self.logger.info(f"📁 Dossier modèles: {self.models_dir}")
+        self.logger.info("Système de versioning initialisé")
+        self.logger.info(f"Dossier modèles: {self.models_dir}")
     
     def setup_logging(self):
         """Configure le système de logging"""
@@ -48,12 +48,12 @@ class ModelVersioningCLI:
         )
         
         self.logger = logging.getLogger("ModelVersioning")
-        self.logger.info(f"📝 Logging configuré - Fichier: {log_file}")
+        self.logger.info(f"Logging configuré - Fichier: {log_file}")
     
     def deployer_modele(self, model_type: str, source_path: str = None, metadata: dict = None):
         """Déploie un nouveau modèle"""
-        self.logger.info(f"🚀 DÉPLOIEMENT MODÈLE {model_type.upper()}")
-        self.logger.info("=" * 50)
+        self.logger.info(f"DÉPLOIEMENT MODÈLE {model_type.upper()}")
+
         
         try:
             # Déterminer le chemin source automatiquement si non fourni
@@ -85,7 +85,7 @@ class ModelVersioningCLI:
                         self.logger.error("❌ Aucun modèle CatBoost trouvé")
                         return False
             
-            self.logger.info(f"📁 Source: {source_path}")
+            self.logger.info(f"Source: {source_path}")
             
             # Métadonnées par défaut
             if not metadata:
@@ -93,7 +93,7 @@ class ModelVersioningCLI:
             
             # Afficher la prochaine version calculée
             version_info = self.manager._generate_version_info(model_type, metadata)
-            self.logger.info(f"🔢 Prochaine version: v{version_info['version']}")
+            self.logger.info(f"Prochaine version: v{version_info['version']}")
             
             # Déploiement
             result = self.manager.deployer_modele(source_path, model_type, metadata)
@@ -101,11 +101,11 @@ class ModelVersioningCLI:
             if result["success"]:
                 version_info = result["version_info"]
                 self.logger.info(f"✅ DÉPLOIEMENT RÉUSSI!")
-                self.logger.info(f"   Version: v{version_info['version']}")
-                self.logger.info(f"   Taille: {version_info['model_size_mb']} MB")
-                self.logger.info(f"   Format: {version_info['model_format']}")
-                self.logger.info(f"   Chemin: {result['current_path']}")
-                self.logger.info(f"   ID: {result['version_id']}")
+                self.logger.info(f"Version: v{version_info['version']}")
+                self.logger.info(f"Taille: {version_info['model_size_mb']} MB")
+                self.logger.info(f"Format: {version_info['model_format']}")
+                self.logger.info(f"Chemin: {result['current_path']}")
+                self.logger.info(f"ID: {result['version_id']}")
                 return True
             else:
                 self.logger.error(f"❌ ÉCHEC DU DÉPLOIEMENT: {result['error']}")
@@ -117,58 +117,58 @@ class ModelVersioningCLI:
     
     def lister_versions(self, model_type: str = None):
         """Liste les versions disponibles"""
-        self.logger.info("📚 LISTE DES VERSIONS")
+        self.logger.info("LISTE DES VERSIONS")
         self.logger.info("=" * 30)
         
         model_types = [model_type] if model_type else ["dl", "ml"]
         
         for mtype in model_types:
-            self.logger.info(f"\n🎯 MODÈLES {mtype.upper()}:")
+            self.logger.info(f"\nMODÈLES {mtype.upper()}:")
             self.logger.info("-" * 20)
             
             versions = self.manager.lister_versions(mtype)
             
             if not versions:
-                self.logger.info("   Aucune version trouvée")
+                self.logger.info("Aucune version trouvée")
                 continue
             
             for i, version in enumerate(versions, 1):
                 status = "🟢 ACTUEL" if self._is_current_version(mtype, version['version']) else "⚪"
                 
-                self.logger.info(f"   {i}. {status} v{version['version']}")
-                self.logger.info(f"      📅 Déployé: {version.get('deployed_at', 'Date inconnue')}")
-                self.logger.info(f"      📊 Taille: {version.get('model_size_mb', 0)} MB")
-                self.logger.info(f"      🔗 Format: {version.get('model_format', 'Inconnu')}")
+                self.logger.info(f"{i}. {status} v{version['version']}")
+                self.logger.info(f"Déployé: {version.get('deployed_at', 'Date inconnue')}")
+                self.logger.info(f"Taille: {version.get('model_size_mb', 0)} MB")
+                self.logger.info(f"Format: {version.get('model_format', 'Inconnu')}")
                 
                 if 'architecture' in version:
-                    self.logger.info(f"      🏗️  Architecture: {version['architecture']}")
+                    self.logger.info(f"Architecture: {version['architecture']}")
                 if 'algorithm' in version:
-                    self.logger.info(f"      ⚙️  Algorithme: {version['algorithm']}")
+                    self.logger.info(f"Algorithme: {version['algorithm']}")
                 if 'deployment_reason' in version:
-                    self.logger.info(f"      📝 Raison: {version['deployment_reason']}")
+                    self.logger.info(f"Raison: {version['deployment_reason']}")
                 
                 self.logger.info("")
     
     def rollback(self, model_type: str, version_id: str):
         """Effectue un rollback vers une version spécifique"""
-        self.logger.info(f"🔄 ROLLBACK MODÈLE {model_type.upper()}")
-        self.logger.info("=" * 40)
+        self.logger.info(f"ROLLBACK MODÈLE {model_type.upper()}")
+
         
         # Version actuelle
         current_version = self.manager.obtenir_version_actuelle(f"{model_type}_model")
-        self.logger.info(f"📍 Version actuelle: v{current_version}")
-        self.logger.info(f"🎯 Version cible: {version_id}")
+        self.logger.info(f"Version actuelle: v{current_version}")
+        self.logger.info(f"Version cible: {version_id}")
         
         result = self.manager.rollback_to_version(model_type, version_id)
         
         if result["success"]:
             self.logger.info("✅ ROLLBACK RÉUSSI!")
-            self.logger.info(f"   Message: {result['message']}")
-            self.logger.info(f"   Nouveau chemin: {result['current_path']}")
+            self.logger.info(f"Message: {result['message']}")
+            self.logger.info(f"Nouveau chemin: {result['current_path']}")
             
             # Vérifier la nouvelle version
             new_version = self.manager.get_current_version(f"{model_type}_model")
-            self.logger.info(f"   Version confirmée: v{new_version}")
+            self.logger.info(f"Version confirmée: v{new_version}")
             return True
         else:
             self.logger.error(f"❌ ÉCHEC DU ROLLBACK: {result['error']}")
@@ -176,62 +176,62 @@ class ModelVersioningCLI:
     
     def status(self):
         """Affiche le statut complet du système"""
-        self.logger.info("📊 STATUT DU SYSTÈME DE VERSIONING")
-        self.logger.info("=" * 50)
+        self.logger.info("STATUT DU SYSTÈME DE VERSIONING")
+
         
         # Statut général
         self.logger.info("\n🎯 VERSIONS ACTUELLES:")
         ssd_version = self.manager.get_current_version("dl_model")
         catboost_version = self.manager.get_current_version("ml_model")
         
-        self.logger.info(f"   SSD MobileNet V2: v{ssd_version}")
-        self.logger.info(f"   CatBoost: v{catboost_version}")
+        self.logger.info(f"SSD MobileNet V2: v{ssd_version}")
+        self.logger.info(f"CatBoost: v{catboost_version}")
         
         # Chemins actuels
-        self.logger.info("\n📁 CHEMINS ACTUELS:")
+        self.logger.info("\nCHEMINS ACTUELS:")
         ssd_path = self.manager.get_current_model_path("dl")
         catboost_path = self.manager.get_current_model_path("ml")
         
-        self.logger.info(f"   SSD: {ssd_path}")
-        self.logger.info(f"   CatBoost: {catboost_path}")
+        self.logger.info(f"SSD: {ssd_path}")
+        self.logger.info(f"CatBoost: {catboost_path}")
         
         # Validation
         self.logger.info("\n✅ VALIDATION:")
         ssd_valid = ssd_path.exists() if ssd_path else False
         catboost_valid = catboost_path.exists() if catboost_path else False
         
-        self.logger.info(f"   SSD valide: {'✅' if ssd_valid else '❌'}")
-        self.logger.info(f"   CatBoost valide: {'✅' if catboost_valid else '❌'}")
+        self.logger.info(f"SSD valide: {'✅' if ssd_valid else '❌'}")
+        self.logger.info(f"CatBoost valide: {'✅' if catboost_valid else '❌'}")
         
         # Statistiques
         ssd_versions = self.manager.list_versions("dl")
         ml_versions = self.manager.list_versions("ml")
         
-        self.logger.info("\n📈 STATISTIQUES:")
-        self.logger.info(f"   Total versions SSD: {len(ssd_versions)}")
-        self.logger.info(f"   Total versions CatBoost: {len(ml_versions)}")
+        self.logger.info("\nSTATISTIQUES:")
+        self.logger.info(f"Total versions SSD: {len(ssd_versions)}")
+        self.logger.info(f"Total versions CatBoost: {len(ml_versions)}")
         
         # Espace disque
         total_ssd_size = sum(v.get('model_size_mb', 0) for v in ssd_versions)
         total_ml_size = sum(v.get('model_size_mb', 0) for v in ml_versions)
         
-        self.logger.info(f"   Espace SSD: {total_ssd_size:.2f} MB")
-        self.logger.info(f"   Espace CatBoost: {total_ml_size:.2f} MB")
-        self.logger.info(f"   Espace total: {total_ssd_size + total_ml_size:.2f} MB")
+        self.logger.info(f"Espace SSD: {total_ssd_size:.2f} MB")
+        self.logger.info(f"Espace CatBoost: {total_ml_size:.2f} MB")
+        self.logger.info(f"Espace total: {total_ssd_size + total_ml_size:.2f} MB")
     
     def cleanup(self, model_type: str, keep_count: int = 3):
         """Nettoie les anciennes versions"""
-        self.logger.info(f"🧹 NETTOYAGE MODÈLE {model_type.upper()}")
-        self.logger.info("=" * 40)
+        self.logger.info(f"NETTOYAGE MODÈLE {model_type.upper()}")
+
         
         versions_before = self.manager.list_versions(model_type)
-        self.logger.info(f"📊 Versions avant nettoyage: {len(versions_before)}")
+        self.logger.info(f"Versions avant nettoyage: {len(versions_before)}")
         
         if len(versions_before) <= keep_count:
             self.logger.info(f"✅ Pas besoin de nettoyage (≤ {keep_count} versions)")
             return
         
-        self.logger.info(f"🗑️  Suppression des versions anciennes (garde {keep_count})")
+        self.logger.info(f"Suppression des versions anciennes (garde {keep_count})")
         
         try:
             self.manager.cleanup_old_versions(model_type, keep_count)
@@ -240,8 +240,8 @@ class ModelVersioningCLI:
             deleted_count = len(versions_before) - len(versions_after)
             
             self.logger.info(f"✅ NETTOYAGE TERMINÉ!")
-            self.logger.info(f"   Versions supprimées: {deleted_count}")
-            self.logger.info(f"   Versions restantes: {len(versions_after)}")
+            self.logger.info(f"Versions supprimées: {deleted_count}")
+            self.logger.info(f"Versions restantes: {len(versions_after)}")
             
         except Exception as e:
             self.logger.error(f"❌ ERREUR DE NETTOYAGE: {e}")

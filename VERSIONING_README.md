@@ -1,15 +1,15 @@
-# 🚀 Système de Versioning Gaia Vision
+# Système de Versioning Gaia Vision
 
 ## Vue d'ensemble
 
 Système complet de versioning pour les modèles ML/DL du projet Gaia Vision avec logging automatique, incrémentation des versions, et gestion des rollbacks.
 
-## 🎯 Modèles supportés
+## Modèles supportés
 
 - **SSD MobileNet V2** (Deep Learning) - Détection de contamination
 - **CatBoost Classifier** (Machine Learning) - Prédiction basée sur les features
 
-## 🛠️ Utilisation
+## Utilisation
 
 ### Script simple (recommandé)
 
@@ -62,7 +62,7 @@ python model_versioning.py cleanup ml --keep 3
 python model_versioning.py status
 ```
 
-## 📊 État actuel
+## État actuel
 
 ### Versions déployées
 - **SSD MobileNet V2:** v1.5 (22.83 MB, SavedModel)
@@ -73,7 +73,7 @@ python model_versioning.py status
 - **Total versions CatBoost:** 4
 - **Espace utilisé:** ~264 MB
 
-## 📁 Structure des dossiers
+## Structure des dossiers
 
 ```
 api/models/
@@ -101,7 +101,7 @@ api/models/
 └── model_version_manager.py
 ```
 
-## 📝 Logging
+## Logging
 
 Tous les logs sont automatiquement sauvegardés dans :
 ```
@@ -119,34 +119,34 @@ logs/versioning_YYYYMMDD_HHMMSS.log
 2025-07-16 20:29:17,585 - ModelVersioning - INFO -    Format: SavedModel
 ```
 
-## 🔧 Fonctionnalités
+## Fonctionnalités
 
-### ✅ Versioning automatique
+### Versioning automatique
 - Incrémentation automatique des versions
 - Support multi-format (SavedModel, Keras, Joblib)
 - Métadonnées complètes pour chaque version
 
-### ✅ Déploiement robuste
+### Déploiement robuste
 - Détection automatique du format de modèle
 - Copie sécurisée avec vérification d'intégrité
 - Liens symboliques automatiques vers `current`
 
-### ✅ Gestion des rollbacks
+### Gestion des rollbacks
 - Rollback vers n'importe quelle version
 - Validation de l'existence des versions
 - Mise à jour automatique des liens
 
-### ✅ Nettoyage intelligent
+### Nettoyage intelligent
 - Conservation des N dernières versions
 - Suppression sécurisée des anciennes versions
 - Préservation de la version actuelle
 
-### ✅ Monitoring complet
+### Monitoring complet
 - Logging détaillé de toutes les opérations
 - Statut en temps réel du système
 - Historique des déploiements
 
-## 📈 Métadonnées sauvegardées
+## Métadonnées sauvegardées
 
 Chaque version contient :
 ```json
@@ -169,7 +169,7 @@ Chaque version contient :
 }
 ```
 
-## 🔍 Exemples d'usage
+## Exemples d'usage
 
 ### Déploiement quotidien
 ```bash
@@ -204,7 +204,7 @@ python model_versioning.py rollback dl v1.4_20250716_202612
 ./versioning.sh status
 ```
 
-## 🚨 Points importants
+## Points importants
 
 1. **Sauvegarde automatique** : Chaque déploiement crée une copie complète
 2. **Liens symboliques** : Le dossier `current` pointe toujours vers la version active
@@ -212,7 +212,7 @@ python model_versioning.py rollback dl v1.4_20250716_202612
 4. **Logging complet** : Toutes les opérations sont tracées
 5. **Rollback sécurisé** : Validation avant changement de version
 
-## 🆘 Support
+## Support
 
 En cas de problème :
 1. Vérifier les logs : `./versioning.sh logs`

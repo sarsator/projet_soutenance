@@ -46,7 +46,7 @@ class VisionModel:
                 latest_version = self._find_latest_version(versions_path)
                 if latest_version:
                     self.model_path = latest_version
-                    logger.info(f"🔗 Modèle vision via versioning: {latest_version.name}")
+                    logger.info(f"Modele vision via versioning: {latest_version.name}")
                 else:
                     self.model_path = self._fallback_path(current_dir)
             else:
@@ -58,12 +58,22 @@ class VisionModel:
         
     def _find_latest_version(self, versions_path: Path) -> Path:
         """Trouve la version la plus récente dans le dossier versions"""
+        
+        # Priorité 1: Utiliser le symlink 'current' s'il existe
+        current_symlink = versions_path / "current"
+        if current_symlink.exists() and current_symlink.is_symlink():
+            target_path = current_symlink.resolve()
+            if target_path.exists():
+                logger.info(f"Utilisation du symlink current: {target_path.name}")
+                return target_path / "saved_model"
+        
+        # Fallback: Recherche manuelle de la version la plus récente
         import re
         from datetime import datetime
         
         versions = []
         for folder in versions_path.iterdir():
-            if folder.is_dir():
+            if folder.is_dir() and folder.name != "current":
                 # Format: v1.3_20250716_132518
                 match = re.match(r'v(\d+)\.(\d+)_(\d{8}_\d{6})', folder.name)
                 if match:
@@ -77,21 +87,25 @@ class VisionModel:
         if versions:
             # Trier par version puis par timestamp
             versions.sort(key=lambda x: (x[0], x[1], x[2]))
-            return versions[-1][3]  # Retourner le dossier de la version la plus récente
+            latest_folder = versions[-1][3]
+            return latest_folder / "saved_model"
         
         return None
     
     def _fallback_path(self, current_dir: Path) -> Path:
-        """Chemin de fallback vers les anciens modèles"""
-        current_path = current_dir / "dl_model" / "current"
-        fallback_path = current_dir / "dl_model" / "final_model.keras"
+        """Chemin de fallback vers les anciens modeles"""
+        paths_to_try = [
+            current_dir / "dl_model" / "current",
+            current_dir / "dl_model" / "final_model.keras"
+        ]
         
-        if current_path.exists():
-            logger.info("🔗 Fallback vers modèle current")
-            return current_path
-        else:
-            logger.info("📁 Fallback vers modèle legacy")
-            return fallback_path 
+        for path in paths_to_try:
+            if path.exists():
+                logger.info(f"Fallback vers modele: {path.name}")
+                return path
+        
+        # Si rien n'existe, retourner le dernier pour debugging
+        return paths_to_try[-1] 
         
     def charger_modele(self) -> bool:
         """
@@ -104,12 +118,12 @@ class VisionModel:
         try:
             model_path = Path(self.model_path)
             
-            # Gestion des liens symboliques (pour le versioning)
+            # Gestion des liens symboliques
             if model_path.is_symlink():
                 model_path = model_path.resolve()
-                logger.info(f"🔗 Lien symbolique résolu vers: {model_path}")
+                logger.info(f"Lien symbolique resolu vers: {model_path}")
             
-            # Détecter le type de modèle
+            # Detecter le type de modele et charger
             if self._is_savedmodel_format(model_path):
                 return self._load_savedmodel(model_path)
             else:
@@ -141,7 +155,7 @@ class VisionModel:
             if metadata_file.exists():
                 with open(metadata_file, 'r') as f:
                     self.metadata = json.load(f)
-                logger.info(f"📋 Métadonnées chargées: {self.metadata.get('architecture', 'Unknown')}")
+                logger.info(f"Metadonnees chargees: {self.metadata.get('architecture', 'Unknown')}")
             
             # Déterminer le chemin du SavedModel
             saved_model_dir = model_path / "saved_model"
@@ -161,20 +175,20 @@ class VisionModel:
             
             # Vérifier les signatures
             signatures = list(self.model.signatures.keys())
-            logger.info(f"📋 Signatures disponibles: {signatures}")
+            logger.info(f"Signatures disponibles: {signatures}")
             
             if 'serving_default' in signatures:
                 serving_fn = self.model.signatures['serving_default']
-                logger.info("✅ Signature 'serving_default' trouvée")
+                logger.info("Signature 'serving_default' trouvee")
                 
                 # Log des inputs/outputs
                 for name, spec in serving_fn.structured_input_signature[1].items():
-                    logger.info(f"  📥 Input {name}: {spec.shape} ({spec.dtype})")
+                    logger.info(f"  Input {name}: {spec.shape} ({spec.dtype})")
                 
                 for name, spec in serving_fn.structured_outputs.items():
-                    logger.info(f"  📤 Output {name}: {spec.shape}")
+                    logger.info(f"  Output {name}: {spec.shape}")
             
-            logger.info("✅ SavedModel chargé avec succès")
+            logger.info("SavedModel charge avec succes")
             return True
             
         except Exception as e:
@@ -216,11 +230,11 @@ class VisionModel:
             for i, output in enumerate(self.model.outputs):
                 logger.info(f"  Sortie {i}: {output.name} - Shape: {output.shape}")
             
-            logger.info("✅ Modèle Keras chargé avec succès")
+            logger.info("Modele Keras charge avec succes")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Erreur lors du chargement du modèle Keras: {e}")
+            logger.error(f"Erreur lors du chargement du modele Keras: {e}")
             return False
     
     def _get_dir_size(self, dir_path: Path) -> float:
@@ -291,39 +305,90 @@ class VisionModel:
             logger.error(f"Erreur lors de la prédiction vision: {e}")
             raise
     
+    def _analyze_contamination_score(self, score: float, class_type: str) -> tuple:
+        """Analyse un score de contamination et retourne prediction et confidence"""
+        if class_type == "contaminated":
+            if score >= 0.30:
+                return "contamine", score * 1.3
+            elif score >= 0.20:
+                return "contamine", score * 1.5
+            elif score >= 0.15:
+                return "incertain", score * 1.2
+            else:
+                return "sain", 0.6
+        else:  # healthy
+            if score >= 0.7:
+                return "sain", score * 1.1
+            elif score < 0.15:
+                return "sain", score * 4.0
+            elif score < 0.3:
+                return "sain", score * 3.0
+            else:
+                return "sain", score * 2.0
+
+    def _analyze_mixed_detection(self, max_contaminated_score: float, max_healthy_score: float) -> dict:
+        """Analyse le cas mixte contamination + sain"""
+        if max_contaminated_score >= 0.25:
+            return {
+                "prediction": "contamine",
+                "confidence": min(max_contaminated_score * 1.5, 0.90),
+                "contamination_probability": min(max_contaminated_score * 1.3, 0.95)
+            }
+        elif max_contaminated_score >= 0.15:
+            logger.warning(f"Contamination possible detectee: score={max_contaminated_score:.3f}")
+            return {
+                "prediction": "incertain", 
+                "confidence": max_contaminated_score * 1.2,
+                "contamination_probability": max_contaminated_score * 1.5
+            }
+        else:
+            if max_healthy_score > max_contaminated_score:
+                confidence = max_healthy_score * (2.5 if max_healthy_score < 0.2 else 1.5)
+                return {
+                    "prediction": "sain",
+                    "confidence": min(confidence, 0.75),
+                    "contamination_probability": max_contaminated_score
+                }
+            else:
+                return {
+                    "prediction": "incertain",
+                    "confidence": 0.3,
+                    "contamination_probability": 0.4
+                }
+
     def _predict_savedmodel(self, img_tensor: tf.Tensor) -> Dict[str, Any]:
-        """Prédiction avec le modèle SSD SavedModel"""
+        """Prediction avec le modele SSD SavedModel"""
         try:
-            # Obtenir la fonction d'inférence
+            # Obtenir la fonction d'inference
             infer = self.model.signatures['serving_default']
             
-            # Effectuer l'inférence
+            # Effectuer l'inference
             predictions = infer(input_tensor=img_tensor)
             
-            # Extraire les résultats
+            # Extraire les resultats
             detection_boxes = predictions['detection_boxes'].numpy()[0]
             detection_classes = predictions['detection_classes'].numpy()[0]
             detection_scores = predictions['detection_scores'].numpy()[0]
             num_detections = int(predictions['num_detections'].numpy()[0])
             
-            # Analyser les détections valides (score > 0.2) - SEUIL OPTIMAL POUR CONTAMINATION
+            # Analyser les detections valides
             valid_detections = []
             contaminated_count = 0
             healthy_count = 0
             max_contaminated_score = 0.0
             max_healthy_score = 0.0
             
-            # Log pour debug : afficher toutes les détections
-            logger.info("=== ANALYSE DÉTAILLÉE DES DÉTECTIONS ===")
-            for i in range(min(10, len(detection_scores))):  # Top 10 détections
+            # Log pour debug
+            logger.info("=== ANALYSE DETAILLEE DES DETECTIONS ===")
+            for i in range(min(10, len(detection_scores))):
                 score = float(detection_scores[i])
                 class_id = int(detection_classes[i])
                 class_name = self.class_names[class_id] if class_id < len(self.class_names) else "unknown"
-                logger.info(f"  Détection {i}: classe={class_name} (id={class_id}), score={score:.4f}")
+                logger.info(f"  Detection {i}: classe={class_name} (id={class_id}), score={score:.4f}")
             
             for i in range(min(num_detections, len(detection_scores))):
                 score = float(detection_scores[i])
-                if score > 0.08:  # Seuil encore plus bas à 0.08 pour capturer la contamination très faible
+                if score > 0.08:
                     class_id = int(detection_classes[i])
                     box = detection_boxes[i].tolist()
                     
@@ -331,10 +396,10 @@ class VisionModel:
                         "class_id": class_id,
                         "class_name": self.class_names[class_id] if class_id < len(self.class_names) else "unknown",
                         "score": score,
-                        "box": box  # [ymin, xmin, ymax, xmax] normalisé
+                        "box": box
                     })
                     
-                    # Compter par type (classe 1=healthy, classe 2=contaminated)
+                    # Compter par type
                     if class_id == 2:  # contaminated
                         contaminated_count += 1
                         max_contaminated_score = max(max_contaminated_score, score)
@@ -342,173 +407,101 @@ class VisionModel:
                         healthy_count += 1
                         max_healthy_score = max(max_healthy_score, score)
             
-            # Déterminer la prédiction finale - LOGIQUE SPÉCIALISÉE POUR LA CONTAMINATION
+            # Determiner la prediction finale
             if contaminated_count > 0 and healthy_count > 0:
-                # Cas mixte : contamination + objets sains détectés
+                # Cas mixte
                 contaminated_ratio = contaminated_count / (contaminated_count + healthy_count)
+                logger.info(f"Analyse mixte: {contaminated_count} contamine(s), {healthy_count} sain(s)")
+                logger.info(f"Ratio contamination: {contaminated_ratio:.3f}")
+                logger.info(f"Meilleur score contamine: {max_contaminated_score:.3f}")
+                logger.info(f"Meilleur score sain: {max_healthy_score:.3f}")
                 
-                logger.info(f"🔍 Analyse mixte: {contaminated_count} contaminé(s), {healthy_count} sain(s)")
-                logger.info(f"📊 Ratio contamination: {contaminated_ratio:.3f}")
-                logger.info(f"💀 Meilleur score contaminé: {max_contaminated_score:.3f}")
-                logger.info(f"✅ Meilleur score sain: {max_healthy_score:.3f}")
-                
-                # LOGIQUE CORRIGÉE : Seuils plus stricts pour éviter les faux positifs
-                if max_contaminated_score >= 0.25:  # Seuil raisonnable pour contamination réelle
-                    prediction = "contamine"
-                    confidence = max_contaminated_score * 1.5  # Amplification modérée
-                    contamination_probability = max_contaminated_score * 1.3
-                elif max_contaminated_score >= 0.15:  # Score modéré = incertain
-                    prediction = "incertain"
-                    confidence = max_contaminated_score * 1.2
-                    contamination_probability = max_contaminated_score * 1.5
-                    logger.warning(f"⚠️ Contamination possible détectée: score={max_contaminated_score:.3f}")
-                else:  # Score faible (<15%) = privilégier le sain
-                    if max_healthy_score > max_contaminated_score:
-                        prediction = "sain"
-                        # Booster la confiance pour les objets sains
-                        if max_healthy_score < 0.2:  # Score très faible
-                            confidence = max_healthy_score * 2.5  # Amplification forte
-                        else:  # Score modéré
-                            confidence = max_healthy_score * 1.5  # Amplification modérée
-                        
-                        confidence = min(confidence, 0.75)  # Cap à 75%
-                        contamination_probability = max_contaminated_score  # Garder trace du risque faible
-                    else:
-                        prediction = "incertain"
-                        confidence = 0.3
-                        contamination_probability = 0.4
-                        
-                # Cap à 90% pour éviter la sur-confiance
-                confidence = min(confidence, 0.90)
-                contamination_probability = min(contamination_probability, 0.95)
+                result = self._analyze_mixed_detection(max_contaminated_score, max_healthy_score)
+                prediction = result["prediction"]
+                confidence = result["confidence"]
+                contamination_probability = result["contamination_probability"]
                         
             elif contaminated_count > 0:
-                # Seulement des contaminations détectées - LOGIQUE PLUS STRICTE
-                logger.info(f"☠️ Contamination pure détectée: score max {max_contaminated_score:.3f}")
-                
-                if max_contaminated_score >= 0.30:  # Seuil élevé pour contamination pure
-                    prediction = "contamine"
-                    confidence = max_contaminated_score * 1.3
-                elif max_contaminated_score >= 0.20:  # Seuil modéré
-                    prediction = "contamine"
-                    confidence = max_contaminated_score * 1.5
-                elif max_contaminated_score >= 0.15:  # Seuil bas = incertain
-                    prediction = "incertain"
-                    confidence = max_contaminated_score * 1.2
-                else:  # Très faible score = probablement sain
-                    prediction = "sain"
-                    confidence = 0.6  # Confiance modérée par défaut
-                
-                # Cap à 85%
+                # Seulement contamination
+                logger.info(f"Contamination pure detectee: score max {max_contaminated_score:.3f}")
+                prediction, confidence = self._analyze_contamination_score(max_contaminated_score, "contaminated")
                 confidence = min(confidence, 0.85)
                 contamination_probability = min(max_contaminated_score * 1.8, 0.90)
                 
             elif healthy_count > 0:
-                # Seulement des objets sains détectés - VÉRIFICATION SUPPLÉMENTAIRE
-                # Si le score "healthy" est modéré (< 0.7), examiner plus attentivement
+                # Seulement sain - verification supplementaire
                 if max_healthy_score < 0.7:
-                    # Regarder s'il y a des détections "contaminated" avec des scores très bas
-                    low_contaminated_scores = []
-                    for i in range(min(num_detections, len(detection_scores))):
-                        score = float(detection_scores[i])
-                        class_id = int(detection_classes[i])
-                        if class_id == 2 and score > 0.1:  # Contaminated avec score > 0.1
-                            low_contaminated_scores.append(score)
+                    # Chercher contamination faible
+                    low_contaminated_scores = [
+                        float(detection_scores[i]) for i in range(min(num_detections, len(detection_scores)))
+                        if int(detection_classes[i]) == 2 and float(detection_scores[i]) > 0.1
+                    ]
                     
                     if low_contaminated_scores:
                         max_low_contaminated = max(low_contaminated_scores)
-                        logger.info(f"⚠️ Détections contamination faibles trouvées: max={max_low_contaminated:.3f}")
+                        logger.info(f"Detections contamination faibles trouvees: max={max_low_contaminated:.3f}")
                         
-                        # Si il y a plusieurs détections "healthy" modérées + contamination faible
-                        # Cela pourrait indiquer une contamination naissante
                         if healthy_count >= 3 and max_healthy_score < 0.65 and max_low_contaminated > 0.15:
-                            prediction = "incertain"  # Plus prudent
-                            confidence = max_healthy_score * 0.6  # Confiance réduite
-                            contamination_probability = 0.4  # Risque de contamination
-                            logger.warning("🔍 Détection ambiguë: objets classés 'sains' mais scores modérés avec traces de contamination")
+                            prediction = "incertain"
+                            confidence = max_healthy_score * 0.6
+                            contamination_probability = 0.4
+                            logger.warning("Detection ambigue: objets classes 'sains' mais scores moderes avec traces de contamination")
                         else:
                             prediction = "sain"
-                            confidence = max_healthy_score * 0.85  # Légère réduction car scores modérés
+                            confidence = max_healthy_score * 0.85
                             contamination_probability = 1.0 - max_healthy_score
                     else:
-                        prediction = "sain"
-                        # Booster encore plus la confiance pour les objets sains
-                        if max_healthy_score < 0.15:  # Score très faible
-                            confidence = max_healthy_score * 4.0  # Amplification très forte
-                        elif max_healthy_score < 0.3:  # Score modéré  
-                            confidence = max_healthy_score * 3.0  # Amplification forte
-                        else:  # Score correct
-                            confidence = max_healthy_score * 2.0  # Amplification modérée
-                        
-                        # Cap à 75% pour éviter sur-confiance
+                        prediction, confidence = self._analyze_contamination_score(max_healthy_score, "healthy")
                         confidence = min(confidence, 0.75)
                         contamination_probability = 1.0 - max_healthy_score
                 else:
-                    # Score healthy élevé (>= 0.7), on peut faire confiance
-                    prediction = "sain"
-                    confidence = max_healthy_score * 1.1  # Légère amplification
-                    confidence = min(confidence, 0.85)  # Cap à 85%
+                    prediction, confidence = self._analyze_contamination_score(max_healthy_score, "healthy")
+                    confidence = min(confidence, 0.85)
                     contamination_probability = 1.0 - max_healthy_score
                 
             else:
-                # Aucune détection valide > 0.25 - regarder les détections faibles avec plus de détails
+                # Aucune detection valide - analyser les faibles
                 weak_detections = []
                 very_weak_detections = []
                 
-                logger.info("=== ANALYSE DES DÉTECTIONS FAIBLES ===")
+                logger.info("=== ANALYSE DES DETECTIONS FAIBLES ===")
                 for i in range(min(num_detections, len(detection_scores))):
                     score = float(detection_scores[i])
                     class_id = int(detection_classes[i])
                     class_name = self.class_names[class_id] if class_id < len(self.class_names) else "unknown"
                     
-                    if score > 0.15:  # Détections faibles mais significatives
+                    if score > 0.15:
                         weak_detections.append((class_id, score, class_name))
-                        logger.info(f"  Détection faible: {class_name} score={score:.4f}")
-                    elif score > 0.05:  # Très faibles mais existantes
+                        logger.info(f"  Detection faible: {class_name} score={score:.4f}")
+                    elif score > 0.05:
                         very_weak_detections.append((class_id, score, class_name))
                 
-                if weak_detections:
-                    # Analyser les détections faibles
-                    contaminated_weak = [d for d in weak_detections if d[0] == 2]
-                    healthy_weak = [d for d in weak_detections if d[0] == 1]
-                    
-                    if contaminated_weak:
-                        best_contaminated = max(contaminated_weak, key=lambda x: x[1])
-                        prediction = "incertain"  # Pas assez sûr pour "contaminé"
-                        confidence = best_contaminated[1] * 0.5
-                        contamination_probability = best_contaminated[1] * 1.2  # Amplifier un peu
-                        logger.info(f"🔍 Contamination faible détectée: score={best_contaminated[1]:.4f}")
-                    elif healthy_weak:
-                        best_healthy = max(healthy_weak, key=lambda x: x[1])
-                        prediction = "sain"
-                        confidence = best_healthy[1] * 0.7
-                        contamination_probability = 1.0 - best_healthy[1]
-                    else:
-                        # Autres classes (background?)
-                        prediction = "incertain"
-                        confidence = 0.3
-                        contamination_probability = 0.5
-                        
-                elif very_weak_detections:
-                    # Seulement des détections très faibles
-                    contaminated_very_weak = [d for d in very_weak_detections if d[0] == 2]
-                    if contaminated_very_weak:
-                        logger.warning("⚠️ Traces très faibles de contamination détectées")
-                        prediction = "incertain"
-                        confidence = 0.25
-                        contamination_probability = 0.6  # Prudence
-                    else:
-                        prediction = "incertain"
-                        confidence = 0.2
-                        contamination_probability = 0.5
+                contaminated_weak = [d for d in weak_detections if d[0] == 2]
+                healthy_weak = [d for d in weak_detections if d[0] == 1]
+                
+                if contaminated_weak:
+                    best_contaminated = max(contaminated_weak, key=lambda x: x[1])
+                    prediction = "incertain"
+                    confidence = best_contaminated[1] * 0.5
+                    contamination_probability = best_contaminated[1] * 1.2
+                    logger.info(f"Contamination faible detectee: score={best_contaminated[1]:.4f}")
+                elif healthy_weak:
+                    best_healthy = max(healthy_weak, key=lambda x: x[1])
+                    prediction = "sain"
+                    confidence = best_healthy[1] * 0.7
+                    contamination_probability = 1.0 - best_healthy[1]
+                elif very_weak_detections and any(d[0] == 2 for d in very_weak_detections):
+                    logger.warning("Traces tres faibles de contamination detectees")
+                    prediction = "incertain"
+                    confidence = 0.25
+                    contamination_probability = 0.6
                 else:
-                    # Vraiment aucune détection significative
                     prediction = "incertain"
                     confidence = 0.2
                     contamination_probability = 0.5
             
-            logger.info(f"SSD Prédiction: {prediction} (confiance: {confidence:.3f})")
-            logger.info(f"Détections: {contaminated_count} contaminé(s), {healthy_count} sain(s)")
+            logger.info(f"SSD Prediction: {prediction} (confiance: {confidence:.3f})")
+            logger.info(f"Detections: {contaminated_count} contamine(s), {healthy_count} sain(s)")
             
             return {
                 "prediction": prediction,
@@ -531,7 +524,7 @@ class VisionModel:
             }
             
         except Exception as e:
-            logger.error(f"Erreur lors de la prédiction SSD: {e}")
+            logger.error(f"Erreur lors de la prediction SSD: {e}")
             raise
     
     def _predict_keras(self, img_array: np.ndarray) -> Dict[str, Any]:

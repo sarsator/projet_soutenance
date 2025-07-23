@@ -2,7 +2,7 @@
 
 Salut ! Bienvenue sur mon projet de soutenance pour Alyra. J'ai développé GaiaSense Vision, une solution IA complète qui combine machine learning classique et deep learning pour l'analyse d'images.
 
-## 🎯 Qu'est-ce que c'est ?
+## 💁 Qu'est-ce que c'est ?
 
 En gros, c'est un système intelligent qui peut :
 - **Analyser des images** avec un modèle SSD MobileNet V2 pour la détection d'objets
@@ -84,14 +84,9 @@ python stop.py
 ## 📈 Performances
 
 **Modèle Vision (SSD MobileNet V2) :**
-- F1-Score : ~60% sur le test set
-- Temps d'inférence : ~150ms par image
-- Taille du modèle : ~23MB
 - Détection d'objets : champignons sains/contaminés
 
 **Modèle ML (CatBoost) :**
-- Accuracy : ~85% en validation croisée
-- Temps d'inférence : ~50ms par prédiction
 - Features importantes : analysées et documentées
 
 ## 🎓 Pour la soutenance
