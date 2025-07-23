@@ -120,7 +120,7 @@ if __name__ == "__main__":
             process.wait()
             
             # Écrire le statut final
-            f.write(f"\n" + "=" * 50 + "\n")
+
             f.write(f"Fin de l'entraînement: {datetime.datetime.now()}\n")
             f.write(f"Code de retour: {process.returncode}\n")
             

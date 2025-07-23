@@ -118,13 +118,13 @@ class ModelVersioningCLI:
     def lister_versions(self, model_type: str = None):
         """Liste les versions disponibles"""
         self.logger.info("LISTE DES VERSIONS")
-        self.logger.info("=" * 30)
+
         
         model_types = [model_type] if model_type else ["dl", "ml"]
         
         for mtype in model_types:
             self.logger.info(f"\nMODÈLES {mtype.upper()}:")
-            self.logger.info("-" * 20)
+
             
             versions = self.manager.lister_versions(mtype)
             

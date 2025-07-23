@@ -18,7 +18,7 @@ def test_ssd_raw():
     model_path = Path("/home/sarsator/projets/gaia_vision/api/models/dl_model/versions/v1.3_20250716_132518/saved_model")
     
     print("🔍 DIAGNOSTIC DU MODÈLE SSD")
-    print("=" * 50)
+
     print(f"Chemin du modèle: {model_path}")
     
     try:

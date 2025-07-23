@@ -13,7 +13,7 @@ Système complet de versioning pour les modèles ML/DL du projet Gaia Vision ave
 
 ### Script simple (recommandé)
 
-```bash
+bash
 # Afficher l'aide
 ./versioning.sh help
 
@@ -37,11 +37,11 @@ Système complet de versioning pour les modèles ML/DL du projet Gaia Vision ave
 
 # Nettoyer les anciennes versions (garde 3 dernières)
 ./versioning.sh cleanup
-```
+
 
 ### Script avancé
 
-```bash
+bash
 # Déployer un modèle spécifique
 python model_versioning.py deploy dl
 python model_versioning.py deploy ml
@@ -60,7 +60,7 @@ python model_versioning.py cleanup ml --keep 3
 
 # Statut complet du système
 python model_versioning.py status
-```
+
 
 ## État actuel
 
@@ -75,7 +75,7 @@ python model_versioning.py status
 
 ## Structure des dossiers
 
-```
+
 api/models/
 ├── dl_model/
 │   ├── current -> versions/v1.5_20250716_202917/saved_model
@@ -99,17 +99,17 @@ api/models/
 │           ├── model_catboost_best.joblib
 │           └── metadata.json
 └── model_version_manager.py
-```
+
 
 ## Logging
 
 Tous les logs sont automatiquement sauvegardés dans :
-```
+
 logs/versioning_YYYYMMDD_HHMMSS.log
-```
+
 
 ### Exemple de log
-```
+
 2025-07-16 20:29:17,571 - ModelVersioning - INFO - 🚀 DÉPLOIEMENT MODÈLE DL
 2025-07-16 20:29:17,571 - ModelVersioning - INFO - 📁 Source: /api/models/dl_model/versions/v1.4_20250716_202612/saved_model
 2025-07-16 20:29:17,571 - ModelVersioning - INFO - 🔢 Prochaine version: v1.5
@@ -117,7 +117,7 @@ logs/versioning_YYYYMMDD_HHMMSS.log
 2025-07-16 20:29:17,585 - ModelVersioning - INFO -    Version: v1.5
 2025-07-16 20:29:17,585 - ModelVersioning - INFO -    Taille: 22.83 MB
 2025-07-16 20:29:17,585 - ModelVersioning - INFO -    Format: SavedModel
-```
+
 
 ## Fonctionnalités
 
@@ -149,7 +149,7 @@ logs/versioning_YYYYMMDD_HHMMSS.log
 ## Métadonnées sauvegardées
 
 Chaque version contient :
-```json
+json
 {
   "version": "1.5",
   "timestamp": "2025-07-16T20:29:17.571070",
@@ -167,12 +167,12 @@ Chaque version contient :
   "model_format": "SavedModel",
   "deployment_reason": "Déploiement automatique via CLI"
 }
-```
+
 
 ## Exemples d'usage
 
 ### Déploiement quotidien
-```bash
+bash
 # Déployer les nouvelles versions
 ./versioning.sh deploy both
 
@@ -181,10 +181,10 @@ Chaque version contient :
 
 # Voir les logs en cas de problème
 ./versioning.sh logs
-```
+
 
 ### Rollback d'urgence
-```bash
+bash
 # Lister les versions disponibles
 python model_versioning.py list dl
 
@@ -193,16 +193,16 @@ python model_versioning.py rollback dl v1.4_20250716_202612
 
 # Vérifier le rollback
 ./versioning.sh status
-```
+
 
 ### Maintenance
-```bash
+bash
 # Nettoyer les anciennes versions
 ./versioning.sh cleanup
 
 # Vérifier l'espace libéré
 ./versioning.sh status
-```
+
 
 ## Points importants
 

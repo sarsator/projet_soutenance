@@ -32,7 +32,7 @@ if __name__ == "__main__":
     print(f"🤖 CatBoost Path: {config.CATBOOST_MODEL_PATH}")
     print(f"👁️ Vision Path: {config.VISION_MODEL_PATH}")
     print("📝 Logs sauvegardés dans: /tmp/gaia_vision_api.log")
-    print("=" * 50)
+
     
     # Mode développement avec logs complets
     uvicorn.run(

@@ -57,7 +57,7 @@ def rename_photos_and_update_csv():
     photos_dir = Path("../training/data/DL_data/photos")
     
     print("DÉBUT DU NETTOYAGE DES NOMS DE FICHIERS")
-    print("=" * 60)
+
     
     # Vérification des chemins
     if not csv_path.exists():
