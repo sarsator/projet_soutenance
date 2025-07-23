@@ -61,7 +61,7 @@ class Config:
         """Valide la configuration"""
         errors = []
         
-        if not cls.API_KEY or cls.API_KEY == "your-secret-api-key":
+        if not cls.API_KEY or cls.API_KEY == "gaia-vision-test-key-2025":
             errors.append("API_KEY non définie ou utilise la valeur par défaut")
         
         # Vérifier les modèles avec fallback

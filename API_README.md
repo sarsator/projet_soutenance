@@ -99,7 +99,7 @@ import requests
 
 # Configuration
 API_URL = "http://localhost:8000"
-API_KEY = "votre_clé_api"
+API_KEY = "gaia-vision-test-key-2025"
 
 # Prédiction avec image
 headers = {"Authorization": f"Bearer {API_KEY}"}
